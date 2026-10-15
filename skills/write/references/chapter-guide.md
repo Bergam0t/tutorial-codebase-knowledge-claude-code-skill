@@ -13,6 +13,8 @@ Also follow `quarto-conventions.md`: it covers front matter, code fences, mermai
 
 ## Structure
 
+The structure below is the default. If your style block has a **Structure** field, or **Extra sections** (the advanced presets do), apply those on top of it, as described under "Advanced chapters" at the end of this guide.
+
 1. **Title**: use the abstraction name, formatted per `quarto-conventions.md` for the `format` you were given. In a book that is an H1 with your `xref` id; in a website it goes in front matter. Give every `##` section an id derived from your xref.
 
 2. **Transition** (skip for chapter 1): a sentence or two linking back to the previous chapter by name, e.g. "In [Query Processing](#sec-query-processing) we saw…" (book) or "In [Query Processing](01_query_processing.qmd) we saw…" (website).
@@ -50,6 +52,22 @@ Part 2 of `quarto-conventions.md` describes the recommended features. Use them a
 - **"View source" links** under verbatim excerpts, when `source_base_url` is provided.
 
 Use them where they help the reader. Don't use every feature in every chapter.
+
+## Advanced chapters (advanced presets)
+
+These rules apply when your style block sets `uses_evidence: true`. Your brief then also includes `evidence.yaml` and `evidence.md`. Read both, and use the entry under your abstraction's id.
+
+- **Compressed structure.** Keep the section order above, but:
+  - make the motivation one paragraph, with the use case in a sentence
+  - fold the key concepts into the internals
+  - keep usage to one short, realistic example (a little more for `advanced-user`)
+  - spend most of the chapter on internals and the **extra sections**
+- **Extra sections.** Add the `##` sections your style block lists, in its order, after the code-level internals and before the conclusion. Give each an id derived from your xref, e.g. `{#sec-query-processing-sharp-edges}`.
+  - Every extra section must be specific to this abstraction and grounded in its code or evidence. If there is genuinely nothing to say, write one honest sentence, e.g. "No known sharp edges beyond the error handling above." Don't pad.
+- **Rationale.** For every claim about *why*, cite an evidence item when one exists (commit, doc, issue/PR, or a comment `path:line`). Otherwise phrase it as an inference ("the code suggests…"). Follow the citing rules in `evidence.md`.
+- **Limitations and known issues.** Draw on `markers` (TODO/FIXME with `path:line`) and `issues` (linked, "open as of <gathered_on>"). End the section with the single issue-tracker line described in `evidence.md`.
+- **Extending this** (`advanced-contributor`): name the concrete files and functions to change, what else must change with them, and the tests that cover the area. Take tests from the evidence `tests` and the outline's `tests`, and give the command to run them if the repo documents one.
+- **Verbatim-first.** Real excerpts by default. Mark a block illustrative only for pseudocode, usage examples or example output.
 
 ## Inside an existing site (integration mode)
 

@@ -9,8 +9,9 @@ Patterns marked **(tested)** were verified with Quarto 1.11.
 - Split `audience` on commas into an ordered list. The **first** audience is the default (listed first in the switcher, navbar and landing page).
 - Each entry is a preset name (`beginner`, `intermediate`) or a quoted free-text description. A comma inside quotes doesn't split. For example, `audience=beginner,"data scientists, new to async"` gives two audiences.
 - Give each audience:
-  - a **slug**: lowercase, hyphens only, used as its folder name. Presets use their own name; derive a short one for free-text audiences (`data-scientists`).
-  - a short **label** for buttons (`Beginner`, `Data scientists`), in the target language.
+  - a **slug**: lowercase, hyphens only, used as its folder name. Presets use their own name (`advanced-contributor`); derive a short one for free-text audiences (`data-scientists`).
+  - a short **label** for buttons, in the target language. Presets use the labels listed in `style-presets.md` (`Beginner`, `Contributor`, `Power user`, …); derive one for free-text audiences (`Data scientists`).
+- **Switcher label**: use "Reading level" if every audience is `beginner` or `intermediate`. Otherwise (roles such as Contributor or Architect are mixed in) use "Written for". Translate it.
 - Slugs must be unique.
 - One audience in the list means the normal single-audience layout: no subfolders and no switcher.
 
@@ -55,7 +56,7 @@ Patterns marked **(tested)** were verified with Quarto 1.11.
    ```
    python <scripts>/add_audience_switcher.py --root <output> --audiences "beginner=Beginner,intermediate=Intermediate" --label "Reading level"
    ```
-   Translate `--label` and the labels into the target language. The script is idempotent: re-run it after any later change to the file set.
+   Set `--label` to the switcher label chosen above. Translate it and the button labels into the target language. The script is idempotent: re-run it after any later change to the file set.
 5. **Critique**: run the three critics **per audience**, each over `<output>/<slug>` with that audience's style block, writing to `_work/critique/<slug>/`. That is 3 × (number of audiences) critics, all read-only, so they can run in parallel in batches of about 12.
 6. **Review**: one reviewer **per audience**, in parallel. They edit disjoint folders. Brief each with its own folder, style block and findings, plus **`render: skip`**, because concurrent renders of one project collide. Run the link checker with `--project <output>`, so that switcher links into sibling folders resolve.
 7. **Render once** at the end yourself: `quarto render <output>` (in integration mode, `quarto render <docs>/<section>`). On errors, resume the reviewer for the affected audience with the error text, then render again. Do this at most twice.
@@ -66,7 +67,7 @@ Use website form: front matter `title: "Tutorial: <project_name>"` (or `"Tutoria
 
 1. The outline `summary`.
 2. The relationship diagram (as in single-audience `index.qmd`).
-3. `## Choose your reading level`, with one button per audience in list order, each followed by the `Reader` line from its style block:
+3. `## Choose your reading level` (or `## Choose your version` when the switcher label is "Written for"), with one button per audience in list order, each followed by the `Reader` line from its style block:
    ```markdown
    [Beginner](beginner/index.qmd){.btn .btn-primary} New to programming concepts as well as to this codebase.
 

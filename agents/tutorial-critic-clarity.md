@@ -28,6 +28,14 @@ Read `index.qmd` first, then every chapter in order, exactly as a newcomer would
 - **The big picture**: after the index and chapter 1, could the reader say what the project does and where to start? After the last chapter, do they have a coherent mental model?
 - **Repetition**: the same concept explained in several chapters instead of linked.
 - **Fit with the site** (integration mode, when you were given `site-profile.yaml`): you may read the site's existing pages, since a real reader sees them, but still not the source code. Does the tutorial's starting point make sense for someone arriving from the site's getting-started page? Does it repeat existing pages instead of linking to them? Is it consistent with their terminology and voice? Are the API links where a reader would want them?
+- **Advanced readers** (advanced presets): here the failure modes run the other way. Flag:
+  - basics over-explained, and padding
+  - analogies used where the reader needs none
+  - motivation or usage that runs long, when the structure should be compressed
+  - extra sections ("Sharp edges", "Extending this", "Design notes", etc.) that are generic boilerplate rather than specific to the code
+  - rationale that reads as speculation dressed up as fact
+
+  Would an experienced engineer in the reader's role find each section worth their time?
 - **Layered features**: does a collapsed "Deep dive" callout hide something the reader needs later? Does the default tab of a tabset suit the audience? Do margin definitions appear the first time a term is used, and are they short? Do code annotations explain, or just restate the code? Is the glossary useful and consistent with the chapters?
 
 Give each chapter a 1–5 clarity score in `scores`.

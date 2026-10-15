@@ -26,6 +26,7 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/quarto-conventions.md`: rules that keep `.qmd` files valid (including how snippets are marked verbatim or illustrative)
 - `references/critique-format.md`: findings format shared by the critics and the reviewer
 - `references/site-integration.md`: integration mode, covering the site profile schema, navigation wiring, API links, and verification
+- `references/evidence.md`: the `evidence.yaml` schema and citing rules for advanced audiences, plus the "known issues" callouts
 - `references/multi-audience.md`: several audiences, covering layout, per-audience fan-out, navigation, the landing page and the switcher
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
@@ -41,7 +42,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `docs` | none | Existing Quarto project folder (containing `_quarto.yml`), relative to the target. Switches on integration mode |
 | `section` | `tutorial` | Integration mode only: subfolder of `docs` to create the tutorial in |
 | `format` | `book` | `book` or `website`. In integration mode it is forced to the site's project type |
-| `audience` | `beginner` | `beginner`, `intermediate`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
+| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
 | `theme` | none | Optional overlay, e.g. `1980s` |
 | `language` | `English` | Language of all generated prose |
 | `output` | `output/<project_name>` | Relative to the current working directory |
@@ -56,6 +57,7 @@ If anything essential is ambiguous (e.g. the target does not exist), ask the use
 - **No Python 3.9+**: stop. The checking scripts need it.
 - **No git**: stop if the target is a URL. Otherwise continue without source permalinks.
 - **No Quarto**: warn that the output won't be rendered or validated, and continue.
+- **Any advanced audience**: also run `gh --version` and `gh auth status`. If either fails, tell the user that GitHub issues and PRs won't be checked, and that the advanced pages will say so. Then continue.
 
 Use whichever Python command worked (`python` or `python3`) in every script command you give to subagents.
 
@@ -66,7 +68,7 @@ Use whichever Python command worked (`python` or `python3`) in every script comm
 ## 2. Fetch
 
 - **Local path**: use it in place. Do not copy it.
-- **URL**: `git clone --depth 1 <url> <output>/_work/repo` and use that as the target.
+- **URL**: `git clone --depth 1 <url> <output>/_work/repo` and use that as the target. If any audience is advanced, use `git clone --filter=blob:none <url> <output>/_work/repo` instead. That keeps the full commit history, which the evidence step needs, while fetching file contents lazily.
 - **project_name**: last URL segment without `.git`, or the basename of the absolute local path.
 - **repo_url** (for the sidebar link): the URL argument, or `git -C <target> remote get-url origin` converted to `https://` form. If there is none, use "none".
 - **source_base_url** (for per-snippet line links): if `repo_url` is on GitHub or GitLab **and** `git -C <target> branch -r --contains HEAD` shows the commit is pushed, use `<repo_url>/blob/<full HEAD sha>/`, a permalink so line numbers stay correct. If the working tree has uncommitted changes to the source files, or the conditions aren't met, use "none".
@@ -84,7 +86,9 @@ Then read the profile:
 
 ## 3. Resolve the style block
 
-Read `style-presets.md`. Build one **style block**: the chosen audience preset (or, for free-text audiences, a custom block written in the same shape as the `beginner` preset and adapted to the described reader), followed by the theme overlay if one was given. Keep the numeric limits (`max_code_block_lines`, `max_diagram_participants`) explicit; the reviewer needs them.
+Read `style-presets.md`. Build one **style block**: the chosen audience preset, followed by the theme overlay if one was given.
+- For an **advanced** preset, the block is the advanced shared base followed by that preset's own section.
+- For a **free-text** audience, write a custom block in the shape of the closest preset, as `style-presets.md` describes. Keep the numeric limits (`max_code_block_lines`, `max_diagram_participants`) explicit; the reviewer needs them.
 
 Save it to `<output>/_work/style.md`. In multi-audience mode, build one block per audience and save each to `<output>/_work/style-<slug>.md`.
 
@@ -98,6 +102,7 @@ Spawn **one** `tutorial-analyst` subagent. Brief it with:
 - the output path: `<output>/_work/outline.yaml`
 - a one-line summary of the audience (so it pitches descriptions appropriately)
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`
+- if any audience is advanced: ask it to fill in `tests` for each abstraction (the test files that exercise it), and to prefer key symbols that include extension points and public interfaces. It may read test files for this, even though tests are excluded from chapter topics.
 
 ## 5. Validate the outline
 
@@ -115,6 +120,14 @@ Read `outline.yaml` and check every rule below. If you can, a quick `python -c` 
 
 On failure (other than trivially fixable filenames), resume or re-spawn the analyst **once** with the specific list of errors. If it still fails, fix what you can yourself and tell the user what you changed.
 
+## 5b. Gather evidence (only if any audience is advanced)
+
+Spawn one `tutorial-evidence-gatherer` with: the target, `repo_url`, the absolute paths to `outline.yaml` and `references/evidence.md`, and the output path `<output>/_work/evidence.yaml`.
+
+When it returns, check that `evidence.yaml` exists and parses. Then note `github.status` and `history.status` for the final report.
+
+In multi-audience mode, you may run this step at the same time as the writers for non-advanced audiences, because they don't need the evidence. Advanced writers must wait for it.
+
 ## 6. Write chapters (parallel)
 
 Spawn **one `tutorial-chapter-writer` per chapter, all in a single message**, so they run concurrently. Each brief contains:
@@ -128,6 +141,7 @@ Spawn **one `tutorial-chapter-writer` per chapter, all in a single message**, so
 - absolute paths to `chapter-guide.md`, `quarto-conventions.md`, and `<output>/_work/style.md`
 - the absolute path to `check_snippets.py`, plus the exact self-check command: `python <script> --repo <target> --out <output> --file <filename>`
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`, and the chapter's `related_pages` and `api_refs`
+- advanced audiences: the absolute paths to `evidence.yaml` and `references/evidence.md`, and the chapter's `tests`
 
 Tell each writer to write only its own file, to self-check its snippets before returning, and to return a 2–3 line summary.
 
@@ -147,6 +161,7 @@ Follow the index rules in `quarto-conventions.md` for the chosen `format`. Conte
    - one edge per relationship: `A<from> -- "<label>" --> A<to>`, with the label's double quotes and newlines removed and the label truncated to 30 characters (27 + `...`) if longer
 4. `## Chapters`, then a numbered list `N. [<name>](<filename>)` in chapter order, each followed by ` — <one_line_summary>`.
 5. A closing line pointing to the [Glossary](glossary.qmd).
+6. Advanced audiences only: the "Known issues" callout from `evidence.md`, placed directly after the summary. There are two versions: one for when GitHub was checked, and one for when it couldn't be (which tells readers to check the tracker themselves).
 
 Give the relationship diagram `%%| label: fig-overview` and `%%| fig-cap:` lines (see `quarto-conventions.md`, Part 2 §3).
 
@@ -235,6 +250,10 @@ Skip this step if `critique=off`. In multi-audience mode, run this step once per
 | `tutorial-critic-clarity` | `_work/critique/clarity.yaml` | output dir, `outline.yaml`, `style.md`. **Not** the repo path: it reads only what a newcomer would see |
 | `tutorial-critic-code` | `_work/critique/code.yaml` | target repo, output dir, `check_snippets.py`, `quarto-conventions.md` |
 | `tutorial-critic-accuracy` | `_work/critique/accuracy.yaml` | target repo, output dir, `outline.yaml` |
+
+For advanced audiences:
+- also give the accuracy critic `evidence.yaml`, so it can check that every cited commit, doc, issue and marker exists and says what the chapter claims
+- tell the code critic that the style is **verbatim-first**
 
 Give every critic the absolute paths to `critique-format.md` and to its findings file. In integration mode, also give the clarity and accuracy critics `site-profile.yaml`. The clarity critic may read the existing site pages (a real reader sees them), but still not the source code. When all three return, check that each findings file exists and parses. Re-spawn any critic whose file is missing.
 

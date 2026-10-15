@@ -68,6 +68,7 @@ Every code block is either a **verbatim** excerpt from the repo or clearly marke
 | `git` | Yes | Cloning URLs, source permalinks, change checks |
 | [Quarto](https://quarto.org) 1.4+ | Recommended | Needed to render and validate the output. Without it, the render step is skipped |
 | [quartodoc](https://machow.github.io/quartodoc/) | Optional | Only for integration with a quartodoc site, and only if the API reference isn't already built |
+| [GitHub CLI](https://cli.github.com) (`gh`), signed in | Optional | Lets the advanced audiences cite open issues and PRs. Without it, advanced pages tell readers to check the issue tracker themselves |
 
 ---
 
@@ -91,7 +92,7 @@ claude plugin install codebase-tutorial@bergam0t
 
 Then start a new session, or run `/reload-plugins`. Type `/codebase-tutorial:write` to check it's there.
 
-The plugin installs the skill and all seven agents together. It's installed at **user scope**, so it's available in every project on your machine.
+The plugin installs the skill and all eight agents together. It's installed at **user scope**, so it's available in every project on your machine.
 
 - **Install it for a whole team on one repository**: run `claude plugin marketplace add Bergam0t/tutorial-codebase-knowledge-claude-code-skill --scope project` in that repo, then commit the `.claude/settings.json` it writes. Each teammate still runs the install command once.
 - **Update**: new versions arrive when the plugin's `version` changes. To update now, run `/plugin marketplace update bergam0t` in a session, or `claude plugin update codebase-tutorial@bergam0t` in your shell. To update automatically, open `/plugin` → **Marketplaces** → `bergam0t` → **Enable auto-update**.
@@ -163,7 +164,7 @@ All options are `key=value` pairs after the optional target.
 |---|---|---|
 | *target* | `.` | Local path or Git URL of the repository to document |
 | `format` | `book` | `book` (numbered chapters and appendix) or `website` (sidebar navigation) |
-| `audience` | `beginner` | `beginner`, `intermediate`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
+| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
 | `theme` | none | Optional flavour overlay. Ships with `1980s` |
 | `language` | `English` | Language of all generated prose. Code and identifiers stay as-is |
 | `output` | `output/<project>` | Where to write the standalone project |
@@ -185,6 +186,38 @@ All options are `key=value` pairs after the optional target.
 | Tabs open on | Simplified | Real code |
 | Collapsed callouts hold | Advanced internals ("Deep dive") | Background refreshers |
 | Voice | Warm and welcoming | Readable, British English |
+
+### Advanced presets
+
+These three presets are for experienced engineers. They share:
+- **verbatim-first code**: real excerpts up to 150 lines; illustrative blocks only for pseudocode or usage examples
+- **a compressed structure**: one-paragraph motivation, brief usage, most of the chapter on internals
+- **a conversational expert voice**: peer to peer, occasional analogies, British English
+
+Each one adds its own **extra sections** to every chapter:
+
+| | `advanced-contributor` | `advanced-architect` | `advanced-user` |
+|---|---|---|---|
+| Reader | About to change the codebase | Assessing the design | Expert user pushing it to its limits |
+| Main emphasis | Extension points, edge cases | Design rationale, limitations and debt | Edge cases, performance, configuration |
+| Extra sections | Extending this · Sharp edges · Design notes · Limitations and open questions | Design notes · Coupling and extensibility · Failure modes · Limitations and open questions | Performance and limits · Sharp edges · Design notes · Known issues |
+| Switcher label | Contributor | Architect | Power user |
+
+**Where the "why" comes from.** For advanced audiences, an extra agent gathers evidence once, before the chapters are written:
+- commit history for each abstraction's files
+- design docs and ADRs, CONTRIBUTING and CHANGELOG
+- TODO/FIXME/HACK markers
+- the tests covering each area
+- open **GitHub issues and pull requests**, if the `gh` CLI is installed and signed in
+
+Chapters cite this evidence inline, and every design explanation is labelled either as documented (citing a commit, doc or issue) or as *inferred from the code*. If GitHub couldn't be checked, each advanced overview page says so, and suggests readers check the issue tracker themselves for known issues, limitations and work in progress. If it was checked, the page gives the date of the check.
+
+When documenting a remote repository, the clone keeps its full commit history (`--filter=blob:none`) so this evidence is available.
+
+```
+/codebase-tutorial:write . audience=advanced-contributor
+/codebase-tutorial:write . audience=beginner,advanced-contributor,advanced-architect
+```
 
 ### Multiple audiences
 
@@ -250,7 +283,9 @@ The final report includes the exact `_quarto.yml` diff. Preview the whole site w
 │ tutorial-analyst │──▶ outline.yaml  (abstractions, relationships, chapter order)
 └──────────────────┘
           │   orchestrator validates the outline
-          ▼
+          ▼                     ┌────────────────────────────┐
+          │  (advanced only) ──▶│ tutorial-evidence-gatherer │──▶ evidence.yaml
+          ▼                     └────────────────────────────┘
 ┌───────────────────────────────────────────┐
 │ tutorial-chapter-writer  × N  (parallel)  │──▶ 01_*.qmd … NN_*.qmd
 └───────────────────────────────────────────┘
@@ -277,6 +312,7 @@ The critics only report and never edit, so they can run at the same time safely.
 | Agent | Role | Model | Effort |
 |---|---|---|---|
 | `tutorial-site-surveyor` | Survey an existing docs site (integration mode only) | Sonnet | medium |
+| `tutorial-evidence-gatherer` | Collect design rationale and known issues: git history, docs, TODO/FIXME, GitHub issues/PRs (advanced audiences only) | Sonnet | medium |
 | `tutorial-analyst` | Choose the abstractions, relationships and chapter order | Opus | high |
 | `tutorial-chapter-writer` | Write one chapter (one instance per chapter) | Opus | medium |
 | `tutorial-critic-clarity` | Read the tutorial as the target reader would; flag confusion | Sonnet | medium |
@@ -381,6 +417,7 @@ agents/
   tutorial-critic-accuracy.md    # factual critique
   tutorial-reviewer.md           # apply fixes, enforce rules, render
   tutorial-site-surveyor.md      # survey an existing docs site
+  tutorial-evidence-gatherer.md  # rationale & known issues for advanced audiences
 skills/
   write/                         # → /codebase-tutorial:write
     SKILL.md                     # the orchestrator
@@ -392,6 +429,7 @@ skills/
       critique-format.md         # findings format for critics and reviewer
       site-integration.md        # integration mode rules and site-profile schema
       multi-audience.md          # switchable versions for several audiences
+      evidence.md                # evidence.yaml schema and citing rules (advanced)
     scripts/
       check_snippets.py          # verbatim / illustrative snippet checker
       check_links.py             # link, anchor and interlink checker

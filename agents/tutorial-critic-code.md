@@ -48,6 +48,7 @@ Illustrative does not mean free to mislead. For each illustrative block:
 - The simplification must not change behaviour in a way the prose relies on: wrong order of calls, a missing important branch presented as complete, or a wrong return type.
 - Example inputs and outputs shown next to snippets must be consistent with what the real code would produce.
 - The caption must name the real source file it is simplified from (or say "Example usage").
+- **Verbatim-first styles** (the advanced presets; your brief says so): an illustrative block is allowed only for pseudocode, usage examples or example output. One that simplifies real code is a **should-fix**. Its `fix` is to replace it with the real excerpt, with its path and line range, split into consecutive excerpts if it is over the length limit.
 
 ## Output
 

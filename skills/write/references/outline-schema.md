@@ -22,6 +22,8 @@ abstractions:
     key_symbols:                  # classes/functions/config keys the chapter should focus on
       - QueryProcessor
       - route_query()
+    tests:                        # advanced audiences only: test files that exercise this abstraction
+      - tests/test_router.py
 
 relationships:
   - from: query_processing        # abstraction id
