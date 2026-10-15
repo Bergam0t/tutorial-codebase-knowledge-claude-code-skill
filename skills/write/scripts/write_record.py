@@ -163,11 +163,17 @@ def cmd_write(args: argparse.Namespace) -> int:
         })
     pages = []
     for pg in info.get("pages", []):
+        evidence = list(pg.get("evidence", []))
+        if pg.get("id") == "briefing" and not evidence:
+            # The briefing summarises the audience's other pages, so it depends on all their sources.
+            for other in info.get("pages", []):
+                if other.get("audience") == pg.get("audience") and other is not pg:
+                    evidence.extend(other.get("evidence", []))
         pages.append({
             "audience": pg.get("audience"),
             "id": pg.get("id"),
             "filename": pg.get("filename"),
-            "files": hash_paths(repo, pg.get("evidence", [])),
+            "files": hash_paths(repo, list(dict.fromkeys(evidence))),
         })
 
     record = {

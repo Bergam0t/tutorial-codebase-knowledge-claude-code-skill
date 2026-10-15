@@ -25,6 +25,8 @@ max_abstractions: 8
 include: ["src/**"]
 exclude: ["src/legacy/**", "**/_vendor/**"]
 critique: on                  # on | off
+learning: on                  # self-tests, exercises, reading paths (see learning.md)
+briefing: pdf,docx            # print-ready briefing for stakeholder audiences
 extensions: [code-window, code-line-style, include-code-files]
 
 # Extra guidance, used by the analyst and every writer

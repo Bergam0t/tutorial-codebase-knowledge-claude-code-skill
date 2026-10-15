@@ -35,3 +35,5 @@ Hard rules (the reviewer will check them):
 - Use only the extensions listed in `extensions.md`.
 
 **Revision mode.** If your brief includes `previous_version` and `changes`, you are updating an existing page after the code changed. Keep everything that is still true (structure, headings, plain names, wording). Change only the claims that the updated `plain-outline.yaml` and the changed code no longer support, and keep the page free of code. Don't alter links or filenames.
+
+**Briefing page.** If your page id is `briefing`, you are writing the audience's print-ready summary, after all its other pages exist. Your brief lists those pages. Read them all and follow "The briefing" in `stakeholder.md` exactly: 500–800 words, the preset's structure, an `In brief` callout, plain Markdown only (no diagrams, margin notes, extension shortcodes or links to other pages), freshness by date, and no claim that the other pages don't make. Use the front matter that section gives, with only the formats your brief lists.

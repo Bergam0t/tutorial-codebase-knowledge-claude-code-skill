@@ -41,3 +41,11 @@ Write `evidence.yaml` to the output path, with `gathered_on` set to today's date
 - the history status, the GitHub status (with the reason if unavailable), and the number of repo docs read
 - per abstraction, the counts of rationale items, markers and issues
 - anything notable, such as a FIXME that matches an open issue
+
+## Starter issues (only when your brief says `starter_issues: true`)
+
+If GitHub is available, also fill the top-level `starter_issues` list (schema in `evidence.md`): open issues that welcome newcomers.
+- `gh issue list --repo <owner/repo> --state open --label "good first issue" --limit 10 --json number,title,url,labels`, and the same for `"help wanted"` and `"beginner"`, merging duplicates.
+- Titles and labels only; don't keep bodies, and never record authors or assignees.
+- Set `abstraction` to the outline id the issue clearly concerns (match on file paths or symbol names in the title), or `null`.
+- If GitHub is unavailable, leave the list empty.

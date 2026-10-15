@@ -58,7 +58,7 @@ If any audience is advanced or a stakeholder preset, also:
 
 ## 5. Decide what to rewrite
 
-A chapter (in every chapter-based audience) is **affected** if its drift status is `stale`, **or** its outline entry changed in step 4 (files, key_symbols, description, introduces). A stakeholder page is affected if it's stale, or if its `uses` references a plain-outline item that changed.
+A chapter (in every chapter-based audience) is **affected** if its drift status is `stale`, **or** its outline entry changed in step 4 (files, key_symbols, description, introduces). A stakeholder page is affected if it's stale, or if its `uses` references a plain-outline item that changed. The `briefing` page is affected whenever any other page of its audience is, and is rewritten **last**, after those pages. With `learning` in the record's `args`, a chapter's self-test or exercise is revised along with the chapter, and the reading paths and first-contribution list are regenerated with the overview.
 
 Also note the **neighbours**: chapters that have a relationship with an affected abstraction but are not themselves affected. They aren't rewritten, but the accuracy critic re-checks them in step 8, because their prose may describe the changed behaviour.
 
@@ -73,6 +73,8 @@ Spawn one writer per affected (audience × chapter or page), all in a single mes
 - `previous_version`: the absolute path of the existing page (the same path as the output)
 - `changes`: the changed source files that matter to this page with their status, and the command to see the change: `git -C <target> diff <recorded commit> -- <path>`. The writer can run it.
 - the **updated** outline entry and chapter list (filenames and xrefs are unchanged)
+
+Include `learning` (with `learning.md`) when the record says so. For the briefing, also include the finished pages' paths and the formats from the record's `args.briefing`; re-render the print formats afterwards (book: explicitly, as `stakeholder.md` describes).
 
 Remind them it's **revision mode**: keep what is still true, change only what the code requires, re-copy every verbatim snippet, don't rename anything. Writers write only their own file.
 

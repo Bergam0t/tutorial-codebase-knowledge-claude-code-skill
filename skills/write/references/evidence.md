@@ -22,6 +22,12 @@ project_signals:               # maintenance signals (used by stakeholder audien
   ci: true                       # CI config present (.github/workflows, .gitlab-ci.yml, …)
   tests: true                    # automated tests present
   licence: MIT                   # from LICENSE, or "none found"
+starter_issues:                # only when learning=on and github.status is checked; up to 8
+  - number: 231
+    title: Document the retry options
+    url: https://github.com/owner/repo/issues/231
+    labels: [good first issue, documentation]   # as on GitHub
+    abstraction: query_processing               # outline id this relates to, or null
 repo_docs:                     # project-wide docs that were read
   - path: CONTRIBUTING.md
     summary: Branch naming, test commands, review rules.

@@ -47,6 +47,8 @@ Read `index.qmd` first, then every chapter in order, exactly as a newcomer would
   - rationale that reads as speculation dressed up as fact
 
   Would an experienced engineer in the reader's role find each section worth their time?
+- **Learning aids** (when the chapters have a "Check your understanding", "Try it", "Design questions" or "Check your setup" section, and you were given `learning.md`): does it teach rather than quiz? Is each question answerable from the chapter alone? Are answers short, and kind? Is the exercise realistic for the reader's role? Do the reading paths on the overview match what this reader would want to do?
+- **Briefing** (`briefing.qmd`, stakeholder audiences): could the reader act on this page alone, printed? Is the "In brief" callout self-sufficient? Any reference to "the page above", links, or diagrams that won't survive print?
 - **Layered features**: does a collapsed "Deep dive" callout hide something the reader needs later? Does the default tab of a tabset suit the audience? Do margin definitions appear the first time a term is used, and are they short? Do code annotations explain, or just restate the code? Is the glossary useful and consistent with the chapters?
 
 Give each chapter a 1–5 clarity score in `scores`.

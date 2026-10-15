@@ -49,6 +49,7 @@ Each page has a fixed filename, so links and navigation are predictable.
 | `keeping-it-running` | `keeping-it-running.qmd` | What does it depend on, how actively is it maintained, and what does upkeep involve? | `dependencies`, project signals |
 | `changing-it` | `changing-it.qmd` | What is easy or hard to change, and why? | the technical outline (coupling, extension points), evidence |
 | `questions-to-ask` | `questions-to-ask.qmd` | What should I ask the development team? | everything above that's uncertain or important |
+| `briefing` | `briefing.qmd` | (only when `briefing` is set) What is the shortest honest summary I could print or forward? | the audience's other pages, already written |
 | `glossary` | `glossary.qmd` | — | `glossary` entries (written by the orchestrator, not a writer) |
 
 ## Page plans per preset
@@ -68,6 +69,51 @@ The pages appear in this order. `overview` and `glossary` are always included.
 - **Domain experts**: precise, in the reader's *domain* language rather than software language. In `how-decisions-are-made`, state every rule, threshold, default and formula the code applies, in words and with real values (e.g. "flags a reading above 140"). Explain how the reader can check it with a known example, and what automated checks exist (from `tests`). Don't oversimplify, because this reader knows their field better than the software does.
 - **Product owners**: capabilities and their limits, and what's cheap or expensive to change, with reasons in plain terms (e.g. "this rule lives in one place, so changing it is small; the report layout is spread across several parts, so changing it is bigger"). In `questions-to-ask`, list questions that would help them prioritise.
 - **Public**: the simplest language (aim for a reading age of about 12–14), second person ("you"), reassurance only when it's backed by the code, and no internal team concerns. On `your-data`, list **only** personal data the code visibly handles, and say clearly what couldn't be determined. Never state or imply legal compliance.
+
+## The briefing (`briefing=pdf|docx|pdf,docx`)
+
+When the `briefing` option is set, every stakeholder audience also gets `briefing.qmd`: a short, self-contained document for people who will print, email or file it rather than browse a website. It is written **after** the audience's other pages, as a summary of them, and is placed just before `glossary` in the page plan.
+
+**Content rules**
+- About two printed pages: **500–800 words**.
+- The facts are those already on the audience's other pages. Read them, and don't introduce claims they lack. If the pages say "not determined from the code", the briefing says so too.
+- Structure (by preset):
+  - decision-maker: *What it is* · *What it does, and what it doesn't* · *What it depends on* · *Risks and open questions* · *What to ask next*
+  - domain-expert: *What it is* · *What it does with your inputs* · *The rules it applies* (real values) · *What it assumes* · *How to check it*
+  - product-owner: *What it is* · *What it can do now* · *Limits and open issues* · *Easy and hard to change* · *Questions for the team*
+  - public: *What it is* · *What it does with information* · *What to keep in mind* · *Who to ask*
+- Begins with an `In brief` callout (3–4 sentences) that stands alone.
+- Zero-code rules apply as everywhere else.
+
+**Format rules** (the file is rendered to print formats as well as HTML, so it must stay portable)
+- Plain Markdown only: headings, paragraphs, lists, tables and callouts.
+- **No** mermaid diagrams, margin notes, tabsets, extension shortcodes (value boxes, highlight-text), icons, or `@fig-`/`@sec-` cross-references.
+- **No relative links to other pages**: they don't work in a PDF or Word file. Say "The full guide is on the project's documentation site" instead. Absolute `https://` links are fine.
+- No commit hashes. State freshness by date: "Based on the software as of <date>."
+
+**Front matter**, with only the formats that were asked for (HTML is included when the project is a website, so the page also appears on the site, with download links added by Quarto):
+
+```yaml
+---
+title: "Briefing: <plain project name>"
+subtitle: "<one line: who it's for, e.g. A summary for decision-makers>"
+date: <generation date, YYYY-MM-DD>
+format:
+  html: default          # website projects only
+  typst:                 # when pdf was requested: PDF without needing LaTeX
+    toc: false
+    papersize: a4        # us-letter for American English
+  docx: default          # when docx was requested
+---
+```
+
+**Rendering** **(tested with Quarto 1.11)**
+- **Website**, standalone or integrated: `quarto render` produces `briefing.html`, `briefing.pdf` and `briefing.docx`, and the HTML page links to the other two.
+- **Book**: a file not listed under `chapters` isn't rendered by the project render, and `html` isn't in its front matter. Render it explicitly **before** the project render: `quarto render <folder>/briefing.qmd --to typst` and/or `--to docx`. Then add `resources: [briefing.pdf, briefing.docx]` under `project:` in `_quarto.yml` (so that the files are copied into `_book/`), and a line at the end of `index.qmd`: "Download the briefing: [PDF](briefing.pdf) · [Word](briefing.docx)".
+- **Integration mode, book site**: render the files next to the page, don't edit the site's `_quarto.yml`, and tell the user to add `resources` themselves.
+- If Quarto isn't installed or the Typst/Word render fails, keep the `.qmd`, report the failure and the command to run later.
+
+**Checks**: the no-code check, and the reviewer verifies the word count, the absence of the excluded constructs and relative links, and that every claim appears on another page of the audience.
 
 ## Translating evidence
 

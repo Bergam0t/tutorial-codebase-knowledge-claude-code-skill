@@ -2,6 +2,12 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
 
+## 1.7.0
+
+- **Learning aids** (`learning=on`): a self-test at the end of every chapter (beginner, intermediate, architect, user) or a hands-on exercise with hints, a test command and a solution sketch (contributor); reading paths on each overview page; and a "first contribution" list from good-first-issue issues (new `starter_issues` evidence). Answers are verified by the accuracy critic.
+- **Stakeholder briefing** (`briefing=pdf|docx|pdf,docx`): a 500-800 word, print-ready summary per stakeholder audience, written after the audience's other pages and limited to claims they make. Rendered to PDF (Typst) and/or Word; in a website the page links to the downloads, in a book they are rendered explicitly and linked from the overview.
+- The record's `args` keep `learning` and `briefing`, so `/codebase-tutorial:update` repeats them and regenerates the briefing whenever any page of its audience changes.
+
 ## 1.6.0
 
 - **`/codebase-tutorial:update`**: refreshes an existing tutorial after the code changes. It reads `_generation.json`, finds the chapters whose source files changed, updates the outline in place (stable ids, names and filenames), has the writers *revise* only those chapters, regenerates the overview, glossary entries and footer if needed, re-critiques only what changed (plus neighbouring chapters for accuracy), reviews, renders and refreshes the record. It stops and recommends a full run when the set of chapters would change, and never commits.

@@ -31,6 +31,8 @@ In integration mode, your brief also includes `site-profile.yaml`, `site-integra
 - Code annotation markers each have a matching numbered list item directly after the block.
 - Collapsed callouts don't hide anything the rest of the chapter depends on.
 - "View source" links are present only when `source_base_url` is set, and their line anchors match the caption's line range.
+- **Learning aids** (`learning: on`): each chapter has exactly one self-test or exercise section, with the id from `learning.md`, directly before the Conclusion. Every answer, hint and solution sketch sits in a collapsed callout, and `index.qmd` has `## Reading paths` whose chapters all exist and respect `builds_on`. In `advanced-contributor`, "Your first contribution" lists only issues present in `evidence.yaml`.
+- **Briefing** (`briefing.qmd`, stakeholder audiences): 500–800 words; plain Markdown only (no mermaid, tabsets, margin notes, shortcodes, `@` cross-references or relative links to other pages); front matter lists only the requested formats; no commit hashes; it makes no claim absent from the audience's other pages. In a book, render it explicitly (`quarto render briefing.qmd --to typst` / `--to docx`) before the project render, and make sure `resources:` and the download line exist (see `stakeholder.md`).
 - Glossary entries agree with the chapters they point to, and every `introduces` term is present.
 
 ## 3. Content checks

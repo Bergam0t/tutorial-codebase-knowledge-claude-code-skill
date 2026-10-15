@@ -26,7 +26,7 @@ The technical outline doesn't capture this, so read the code yourself, starting 
 
 ## 3. Page plans
 
-For each stakeholder audience in your brief, take that preset's page list from `stakeholder.md`. For every page, write a short `focus`: the specific points this codebase calls for. Also list what the page `uses`: components, `data_flows` parts, `decision_points`, evidence. If a page in the plan would have nothing real to say for this codebase (e.g. `your-data` when no personal data is handled), keep the page, and set its focus to stating that plainly. Don't invent content.
+For each stakeholder audience in your brief, take that preset's page list from `stakeholder.md`. For every page, write a short `focus`: the specific points this codebase calls for. Also list what the page `uses`: components, `data_flows` parts, `decision_points`, evidence. If your brief sets `briefing` (not `none`), add a `briefing` page to each stakeholder audience's plan, immediately before `glossary`, with `uses` set to all of that audience's other pages and a `focus` of "a print-ready summary of this audience's pages". If a page in the plan would have nothing real to say for this codebase (e.g. `your-data` when no personal data is handled), keep the page, and set its focus to stating that plainly. Don't invent content.
 
 ## 4. Glossary
 

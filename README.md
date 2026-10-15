@@ -21,6 +21,8 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Quick start](#quick-start)
 - [Options](#options)
 - [Stakeholder presets (no code)](#stakeholder-presets-no-code)
+- [Learning aids](#learning-aids)
+- [Stakeholder briefing](#stakeholder-briefing-pdf--word)
 - [Quarto extensions](#quarto-extensions)
 - [Project config and the generation record](#project-config-and-the-generation-record)
 - [Keeping the tutorial up to date](#keeping-the-tutorial-up-to-date)
@@ -176,6 +178,8 @@ All options are `key=value` pairs after the optional target.
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Tests, docs, build output, vendored deps, lockfiles and binaries are excluded by default |
 | `critique` | `on` | `off` skips the three critic agents (faster and cheaper; the mechanical checks still run) |
 | `extensions` | `code-window`, `code-line-style` | Quarto extensions to install and use. `none`, an explicit list, `+name` / `-name` to change the defaults, or `owner/repo@tag` for others. See [Quarto extensions](#quarto-extensions) |
+| `learning` | `off` | `on` adds a self-test (or, for contributors, an exercise) to every chapter, reading paths to each overview, and a first-contribution list. See [Learning aids](#learning-aids) |
+| `briefing` | `none` | `pdf`, `docx` or `pdf,docx`: stakeholder audiences also get a short print-ready briefing. See [Stakeholder briefing](#stakeholder-briefing-pdf--word) |
 | `config` | `.codebase-tutorial.yml` in the target | Path to a project config file, or `none` to ignore it. See [Project config](#project-config-and-the-generation-record) |
 | `keep_work` | off | Keep `_work/` (the outline, style block and critic findings) for inspection |
 | `docs` | none | Integration mode: the path to an existing Quarto project to add the tutorial to (see below) |
@@ -249,6 +253,29 @@ They can be combined with the other audiences, e.g. `audience=intermediate,stake
 /codebase-tutorial:write . audience=stakeholder-domain-expert
 /codebase-tutorial:write . audience=beginner,advanced-contributor,stakeholder-decision-maker,stakeholder-public
 ```
+
+### Learning aids
+
+`learning=on` turns the tutorial from something to read into something to work through:
+
+| Audience | End-of-chapter section |
+|---|---|
+| beginner, intermediate | **Check your understanding**: 3 questions (recall, reasoning, tracing the use case), each with a collapsed answer |
+| advanced-contributor | **Try it**: one hands-on exercise in the chapter's code, with collapsed hints, the test command to check it, and a solution sketch; plus 2 "where would you look?" questions |
+| advanced-architect | **Design questions**: scenarios about load, failure and change |
+| advanced-user | **Check your setup**: scenarios about configuring and using the area |
+
+Every overview page also gets **Reading paths** (for example "New to the project", "Adding a new …"), built from the outline's prerequisites. For contributors, **Your first contribution** lists open "good first issue" / "help wanted" issues (via `gh`, as of the date gathered) and points to `CONTRIBUTING.md`.
+
+Answers are checked by the accuracy critic against the code: the skill never invents output, and an exercise never claims to have been run.
+
+### Stakeholder briefing (PDF / Word)
+
+`briefing=pdf`, `briefing=docx` or `briefing=pdf,docx` gives each stakeholder audience a **one- to two-page briefing**: a summary of that audience's pages, written to be printed, emailed or filed. It follows the same zero-code rules and contains no claim that the audience's other pages don't make.
+
+- **Website**: `quarto render` produces `briefing.pdf` and `briefing.docx` alongside the HTML page, and the page links to them.
+- **Book**: the files are rendered explicitly and linked from the overview.
+- PDF is produced with Quarto's bundled Typst, so no LaTeX installation is needed.
 
 ### Quarto extensions
 
@@ -588,6 +615,7 @@ skills/
       extensions.md              # vetted Quarto extensions: pins, order, usage notes
       stakeholder.md             # zero-code rules, page menu and plans, plain-outline schema
       config.md                  # .codebase-tutorial.yml and the generation record
+      learning.md                # self-tests, exercises, reading paths, first contribution
     scripts/
       check_snippets.py          # verbatim / included / illustrative snippet checker (+ drift hashes)
       check_links.py             # link, anchor and interlink checker

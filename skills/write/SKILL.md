@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [config=<path>|none] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -32,6 +32,7 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/multi-audience.md`: several audiences, covering layout, per-audience fan-out, navigation, the landing page and the switcher
 - `references/stakeholder.md`: no-code stakeholder audiences, covering the zero-code rules, the page menu, the page plan for each preset, the `plain-outline.yaml` schema, and the checks
 - `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
+- `references/learning.md`: opt-in learning aids (self-tests, exercises, reading paths, first-contribution list)
 - `references/config.md`: the optional `.codebase-tutorial.yml` project config, and the `_generation.json` record and "generated from" footer line
 - `scripts/write_record.py`: prints commit info, and writes `_generation.json` (plugin version, commit, resolved options, per-chapter source hashes)
 - `scripts/check_drift.py`, `scripts/check_tutorial.py`: used by `/codebase-tutorial:update` and CI to find stale chapters and run every mechanical check
@@ -57,6 +58,8 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Default exclude: tests, docs, build/dist, vendored deps, `.venv`, `node_modules`, lockfiles, binary/media files |
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
 | `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |
+| `learning` | `off` | `on` adds a self-test or exercise to every chapter, reading paths to each overview, and (for `advanced-contributor`) a first-contribution list. See `learning.md` |
+| `briefing` | `none` | `pdf`, `docx` or `pdf,docx`: stakeholder audiences also get a short print-ready briefing document. Ignored (with a note) when no audience is a stakeholder preset. See the briefing section of `stakeholder.md` |
 | `config` | `<target>/.codebase-tutorial.yml` | Path to a project config file, or `none` to ignore it. See `config.md` |
 | `keep_work` | off | Keep `<output>/_work/` (outline, critiques) for debugging |
 
@@ -150,7 +153,7 @@ On failure (other than trivially fixable filenames), resume or re-spawn the anal
 
 ## 5b. Gather evidence (only if any audience is advanced or stakeholder)
 
-Spawn one `tutorial-evidence-gatherer` with: the target, `repo_url`, the absolute paths to `outline.yaml` and `references/evidence.md`, and the output path `<output>/_work/evidence.yaml`.
+Spawn one `tutorial-evidence-gatherer` with: the target, `repo_url`, the absolute paths to `outline.yaml` and `references/evidence.md`, and the output path `<output>/_work/evidence.yaml`. If `learning=on` and an `advanced-contributor` audience is listed, add `starter_issues: true`.
 
 When it returns, check that `evidence.yaml` exists and parses. Then note `github.status` and `history.status` for the final report.
 
@@ -158,7 +161,7 @@ In multi-audience mode, you may run this step at the same time as the writers fo
 
 ## 5c. Plan the stakeholder pages (only if any audience is a stakeholder preset)
 
-Spawn one `tutorial-plain-planner` with: the target, the stakeholder audiences, `language`, the absolute paths to `outline.yaml`, `evidence.yaml` and `references/stakeholder.md`, and the output path `<output>/_work/plain-outline.yaml`.
+Spawn one `tutorial-plain-planner` with: the target, the stakeholder audiences, `language`, `briefing` (so it adds the `briefing` page to each plan), the absolute paths to `outline.yaml`, `evidence.yaml` and `references/stakeholder.md`, and the output path `<output>/_work/plain-outline.yaml`.
 
 Then validate the plan:
 - every outline abstraction has a unique `plain_name`
@@ -181,6 +184,7 @@ Spawn **one `tutorial-chapter-writer` per chapter, all in a single message**, so
 - the absolute path to `check_snippets.py`, plus the exact self-check command: `python <script> --repo <target> --out <output> --file <filename>`
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`, and the chapter's `related_pages` and `api_refs`
 - advanced audiences: the absolute paths to `evidence.yaml` and `references/evidence.md`, and the chapter's `tests`
+- `learning: on` (with the absolute path to `learning.md`) when `learning=on`. Writers then add the prescribed section. Not for stakeholder pages.
 - the absolute path to `<output>/_work/extensions.md`. Writers use only the extensions listed there. If `include-code-files` is enabled, tell them to use `include=` (with paths relative to their own chapter file) for every verbatim excerpt.
 
 Tell each writer to write only its own file, to self-check its snippets before returning, and to return a 2–3 line summary.
@@ -192,6 +196,8 @@ Tell each writer to write only its own file, to self-check its snippets before r
 - the no-code self-check command: `python <check_snippets.py> --repo <target> --out <folder> --file <page> --no-code`
 
 The `overview` page (`index.qmd`) is written by a plain writer too, not by you as for technical audiences. It includes the known-issues note from `evidence.md`, worded plainly.
+
+**Briefing** (`briefing` set): the `briefing` page is written in a **second wave**, after every other page of that audience exists, because it summarises them. Spawn one `tutorial-plain-writer` per stakeholder audience with the page id `briefing`, the paths of that audience's finished pages, the requested formats, the generation date, and `format` of the project. Follow "The briefing" in `stakeholder.md`.
 
 After they finish, confirm that every expected `.qmd` file exists. Re-spawn any writer whose file is missing.
 
@@ -210,6 +216,8 @@ Follow the index rules in `quarto-conventions.md` for the chosen `format`. Conte
 4. `## Chapters`, then a numbered list `N. [<name>](<filename>)` in chapter order, each followed by ` — <one_line_summary>`.
 5. A closing line pointing to the [Glossary](glossary.qmd).
 6. Advanced audiences only: the "Known issues" callout from `evidence.md`, placed directly after the summary. There are two versions: one for when GitHub was checked, and one for when it couldn't be (which tells readers to check the tracker themselves).
+
+**Learning** (`learning=on`, chapter-based audiences): add `## Reading paths` after the chapter list, and for `advanced-contributor` `## Your first contribution`, as `learning.md` describes. Build the paths from the outline's `chapter_order` and `builds_on`, and the issues from `evidence.yaml` → `starter_issues`.
 
 Give the relationship diagram `%%| label: fig-overview` and `%%| fig-cap:` lines (see `quarto-conventions.md`, Part 2 §3).
 
@@ -288,6 +296,8 @@ format:
 
 Quote the title if `project_name` contains YAML-sensitive characters.
 
+**Briefing in a book** (`briefing` set, standalone mode): render the briefing explicitly **before** the project render, add `resources: [briefing.pdf, briefing.docx]` (only the requested ones) under `project:` in `_quarto.yml`, and add the download line to the audience's `index.qmd`, as `stakeholder.md` describes. In a website nothing extra is needed: the page's own front matter makes Quarto produce and link the formats.
+
 **Extensions** (from step 2c), in either format, added to `_quarto.yml`:
 ```yaml
 filters:                       # in the order given by extensions.md; omit if empty
@@ -307,7 +317,7 @@ If `lightbox` was requested, add `lightbox: auto` under `format: html`.
 ### Generation record and "generated from" line
 
 1. **Footer**: build the `left:` footer text from the commit info of step 2, as `config.md` describes (translated, with the short sha linked to `commit_url`, and "(plus uncommitted changes)" if `dirty`). In integration mode, add it to the attribution paragraph in `index.qmd` instead.
-2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Then run
+2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Include `learning` and `briefing` in `args`, so an update repeats them. Then run
    ```
    python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] --styles-dir <output>/_work
    ```
@@ -364,6 +374,7 @@ If the reviewer reports unresolved **must-fix** findings, resume it once with th
   - the tutorial must stay inside the repo for its includes to resolve
   - running `python check_snippets.py --repo . --out <tutorial dir>` in CI catches source changes that would leave the prose describing the wrong lines
 - **Config**: if the target had no `.codebase-tutorial.yml`, print the resolved options as a ready-to-paste config (see `config.md`), and say the user can save it to make future runs reproducible. Don't write it into the repo yourself.
+- If a briefing was produced, list the files (`briefing.pdf`, `briefing.docx`) and where they are. If their render failed, give the command to run.
 - Mention that `<output>/_generation.json` records the commit, so the tutorial can be checked for staleness later: `/codebase-tutorial:update` refreshes just the chapters whose source changed, and `scripts/check_tutorial.py` runs the no-AI checks in CI.
 - Integration mode: delete only `<output>/_work/`, keeping `<docs>/_quarto.yml.pre-tutorial.bak` if one was made. Also report:
   - the `_quarto.yml` diff

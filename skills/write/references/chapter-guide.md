@@ -69,6 +69,10 @@ These rules apply when your style block sets `uses_evidence: true`. Your brief t
 - **Extending this** (`advanced-contributor`): name the concrete files and functions to change, what else must change with them, and the tests that cover the area. Take tests from the evidence `tests` and the outline's `tests`, and give the command to run them if the repo documents one.
 - **Verbatim-first.** Real excerpts by default. Mark a block illustrative only for pseudocode, usage examples or example output.
 
+## Learning aids (when `learning` is on)
+
+If your brief says `learning: on`, read `learning.md` and add the section it prescribes for your audience (a self-test, or for `advanced-contributor` an exercise), directly before the Conclusion. Every question and answer must be verifiable from the chapter and the code: never invent output, and never put a new claim in an answer.
+
 ## Inside an existing site (integration mode)
 
 When your brief includes a site profile, the chapter is one part of a larger documentation site. Follow `site-integration.md`:
