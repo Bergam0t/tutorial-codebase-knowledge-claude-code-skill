@@ -1,7 +1,7 @@
 {
   "name": "codebase-tutorial",
   "displayName": "Codebase Tutorial",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Turn a repository into a multi-chapter Quarto tutorial (book or website), or add one to an existing Quarto/quartodoc docs site. Subagents analyse the code, write chapters in parallel, critique for clarity, code fidelity and accuracy, then review and render.",
   "author": {
     "name": "Sammi Rosser",

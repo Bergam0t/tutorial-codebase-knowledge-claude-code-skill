@@ -22,6 +22,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Options](#options)
 - [Stakeholder presets (no code)](#stakeholder-presets-no-code)
 - [Quarto extensions](#quarto-extensions)
+- [Project config and the generation record](#project-config-and-the-generation-record)
 - [Adding a tutorial to an existing Quarto / quartodoc site](#adding-a-tutorial-to-an-existing-quarto--quartodoc-site)
 - [How it works](#how-it-works)
 - [Quality checks](#quality-checks)
@@ -174,6 +175,7 @@ All options are `key=value` pairs after the optional target.
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Tests, docs, build output, vendored deps, lockfiles and binaries are excluded by default |
 | `critique` | `on` | `off` skips the three critic agents (faster and cheaper; the mechanical checks still run) |
 | `extensions` | `code-window`, `code-line-style` | Quarto extensions to install and use. `none`, an explicit list, `+name` / `-name` to change the defaults, or `owner/repo@tag` for others. See [Quarto extensions](#quarto-extensions) |
+| `config` | `.codebase-tutorial.yml` in the target | Path to a project config file, or `none` to ignore it. See [Project config](#project-config-and-the-generation-record) |
 | `keep_work` | off | Keep `_work/` (the outline, style block and critic findings) for inspection |
 | `docs` | none | Integration mode: the path to an existing Quarto project to add the tutorial to (see below) |
 | `section` | `tutorial` | Integration mode: the subfolder of `docs` to create |
@@ -276,6 +278,27 @@ The skill installs Quarto extensions into the tutorial project with `quarto add`
 - **Location:** it's only enabled when the tutorial lives inside the repository it documents, because includes are relative paths.
 - **Missing files:** a wrong path renders as a silently empty block. The snippet checker catches this.
 - **Drift:** the checker records a hash of each included excerpt (`--stamp`). If the source later changes under a tutorial, running `python skills/write/scripts/check_snippets.py --repo . --out <tutorial dir>` in CI fails, so prose describing the old lines doesn't go unnoticed.
+
+### Project config and the generation record
+
+**Config file.** To avoid retyping options, put a `.codebase-tutorial.yml` in the root of the repo you're documenting. Every key is optional and uses the option names above; command-line values win over the file.
+
+```yaml
+audience: [beginner, advanced-contributor, stakeholder-decision-maker]
+format: website
+language: English
+exclude: ["src/legacy/**"]
+extensions: [code-window, code-line-style, include-code-files]
+
+focus: "The plugin system and the scheduler matter most; the CLI wrapper is thin."
+notes: |
+  Call users "operators", never "customers".
+  The product name is "DataBridge", one word.
+```
+
+`focus` steers the analyst; `notes` are house terminology added to every writer's style block. Notes are style guidance only: they can't change what the agents are allowed to do. If you point the skill at a cloned URL, it shows you the config it found and asks before applying it. At the end of a run without a config, the skill prints the options it used as a ready-to-paste file.
+
+**Generation record.** Every run writes `_generation.json` into the tutorial folder (Quarto ignores it), plus a copy of the outline. It records the plugin version, the commit, the resolved options, and a content hash of every source file each chapter depends on. Every page footer also says which commit the tutorial describes ("Generated from commit `813d416` on 2026-10-15"), so readers can judge how fresh it is.
 
 ### Multiple audiences
 
@@ -502,10 +525,12 @@ skills/
       evidence.md                # evidence.yaml schema and citing rules (advanced)
       extensions.md              # vetted Quarto extensions: pins, order, usage notes
       stakeholder.md             # zero-code rules, page menu and plans, plain-outline schema
+      config.md                  # .codebase-tutorial.yml and the generation record
     scripts/
       check_snippets.py          # verbatim / included / illustrative snippet checker (+ drift hashes)
       check_links.py             # link, anchor and interlink checker
       add_audience_switcher.py   # inserts the reading-level switcher (multi-audience)
+      write_record.py            # commit info and the _generation.json record
 CHANGELOG.md
 LICENSE                          # MIT (original + this derivative)
 README.md

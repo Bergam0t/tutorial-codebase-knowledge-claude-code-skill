@@ -2,6 +2,12 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
 
+## 1.5.0
+
+- **Project config**: an optional `.codebase-tutorial.yml` in the documented repo holds audiences, format, language, extensions, include/exclude and so on, so runs are reproducible. Command-line options override it. Two free-text keys: `focus` (a hint for the analyst) and `notes` (house terminology, added to every style block). For cloned URL targets the skill shows the config and asks before applying it. New `config=` option.
+- **Generation record**: every run writes `_generation.json` (plugin version, commit, resolved options, and a blob hash of every source file each chapter or stakeholder page depends on) and a copy of the outline into the tutorial folder, surviving the `_work/` cleanup. New `write_record.py` script.
+- **"Generated from" line**: the page footer (or the attribution line in integration mode) names and links the commit the tutorial describes.
+
 ## 1.4.0
 
 - **Stakeholder audiences (no code)**: four new presets, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner` and `stakeholder-public`. Each gets its own short set of question-led, zero-code pages (from a shared page menu) instead of one chapter per abstraction. Components get plain-English names, with technical names only in the glossary.

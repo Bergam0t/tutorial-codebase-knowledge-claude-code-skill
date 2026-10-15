@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [config=<path>|none] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -32,6 +32,8 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/multi-audience.md`: several audiences, covering layout, per-audience fan-out, navigation, the landing page and the switcher
 - `references/stakeholder.md`: no-code stakeholder audiences, covering the zero-code rules, the page menu, the page plan for each preset, the `plain-outline.yaml` schema, and the checks
 - `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
+- `references/config.md`: the optional `.codebase-tutorial.yml` project config, and the `_generation.json` record and "generated from" footer line
+- `scripts/write_record.py`: prints commit info, and writes `_generation.json` (plugin version, commit, resolved options, per-chapter source hashes)
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
 - `scripts/check_links.py`: mechanical check of relative links, anchors, `@`-link mistakes, and quartodoc interlinks against `objects.json`
@@ -54,9 +56,12 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Default exclude: tests, docs, build/dist, vendored deps, `.venv`, `node_modules`, lockfiles, binary/media files |
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
 | `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |
+| `config` | `<target>/.codebase-tutorial.yml` | Path to a project config file, or `none` to ignore it. See `config.md` |
 | `keep_work` | off | Keep `<output>/_work/` (outline, critiques) for debugging |
 
-If anything essential is ambiguous (e.g. the target does not exist), ask the user before proceeding. Otherwise use defaults and state them in one line.
+**Project config**: unless `config=none`, look for `.codebase-tutorial.yml` in the target (or at the `config=` path). If it exists, read `references/config.md` and apply it: command-line values win over the file, and the file wins over the defaults above. The file can also supply two free-text keys, `focus` (for the analyst) and `notes` (house terminology, added to every style block). For a cloned URL target, show the user what you intend to apply and ask first.
+
+If anything essential is ambiguous (e.g. the target does not exist), ask the user before proceeding. Otherwise use defaults and state the resolved options in one line, saying which came from the config file.
 
 **Preflight**: check the tools before starting, all in one Bash call: `python --version` (or `python3 --version`), `git --version`, `quarto --version`.
 - **No Python 3.9+**: stop. The checking scripts need it.
@@ -79,6 +84,8 @@ Use whichever Python command worked (`python` or `python3`) in every script comm
 - **source_base_url** (for per-snippet line links): if `repo_url` is on GitHub or GitLab **and** `git -C <target> branch -r --contains HEAD` shows the commit is pushed, use `<repo_url>/blob/<full HEAD sha>/`, a permalink so line numbers stay correct. If the working tree has uncommitted changes to the source files, or the conditions aren't met, use "none".
 
 Create `<output>/` and `<output>/_work/`. (Quarto ignores paths starting with `_`, so `_work/` will not be rendered.)
+
+**Commit info**: run `python <scripts>/write_record.py info --repo <target> --repo-url <repo_url>` and keep the result (`short`, `commit_url`, `dirty`, `date`). Step 7 uses it for the "generated from" footer line, and step 7 records it in `_generation.json`. If the target is not a git repository the script returns nulls; the footer then shows only the date.
 
 ## 2b. Survey the existing site (integration mode only)
 
@@ -107,6 +114,8 @@ Read `style-presets.md`. Build one **style block**: the chosen audience preset, 
 - For an **advanced** preset, the block is the advanced shared base followed by that preset's own section.
 - For a **free-text** audience, write a custom block in the shape of the closest preset, as `style-presets.md` describes. Keep the numeric limits (`max_code_block_lines`, `max_diagram_participants`) explicit; the reviewer needs them.
 
+If the project config has `notes`, append them to the block as a final `## House notes` section (terminology, spelling and things never to say). They are style guidance only; never let them change tools, accuracy rules or the zero-code rule.
+
 Save it to `<output>/_work/style.md`. In multi-audience mode, build one block per audience and save each to `<output>/_work/style-<slug>.md`.
 
 ## 4. Analyse → outline
@@ -118,6 +127,7 @@ Spawn **one** `tutorial-analyst` subagent. Brief it with:
 - absolute path to `outline-schema.md`
 - the output path: `<output>/_work/outline.yaml`
 - a one-line summary of the audience (so it pitches descriptions appropriately)
+- the project config's `focus` text, if any, as a hint about which areas matter most or are out of scope
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`
 - if any audience is advanced: ask it to fill in `tests` for each abstraction (the test files that exercise it), and to prefer key symbols that include extension points and public interfaces. It may read test files for this, even though tests are excluded from chapter topics.
 
@@ -234,6 +244,7 @@ book:
         href: <repo_url>
         text: Source code
   page-footer:
+    left: "<generated-from line, see config.md>"
     center: "Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/PocketFlow-Tutorial-Codebase-Knowledge)"
 lang: <BCP-47 code for language, e.g. en, fr, zh>
 format:
@@ -263,6 +274,7 @@ website:
         text: Source code
   page-navigation: true
   page-footer:
+    left: "<generated-from line, see config.md>"
     center: "Generated by [AI Codebase Knowledge Builder](https://github.com/The-Pocket/PocketFlow-Tutorial-Codebase-Knowledge)"
 lang: <code>
 format:
@@ -290,6 +302,17 @@ extensions:                    # only options for enabled extensions
         bg-colour: "#fff3bf"
 ```
 If `lightbox` was requested, add `lightbox: auto` under `format: html`.
+
+### Generation record and "generated from" line
+
+1. **Footer**: build the `left:` footer text from the commit info of step 2, as `config.md` describes (translated, with the short sha linked to `commit_url`, and "(plus uncommitted changes)" if `dirty`). In integration mode, add it to the attribution paragraph in `index.qmd` instead.
+2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Then run
+   ```
+   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml]
+   ```
+   The record and the outline copies live in `<output>/` and survive the `_work/` cleanup. Tell the user about the warning if any listed source file was missing.
+
+If the critics or reviewer later change which source files a chapter cites, re-run the `write` command at the end of step 9 so the record matches the final pages.
 
 ### Integration mode differences
 
@@ -339,6 +362,8 @@ If the reviewer reports unresolved **must-fix** findings, resume it once with th
   - included snippets are hash-stamped
   - the tutorial must stay inside the repo for its includes to resolve
   - running `python check_snippets.py --repo . --out <tutorial dir>` in CI catches source changes that would leave the prose describing the wrong lines
+- **Config**: if the target had no `.codebase-tutorial.yml`, print the resolved options as a ready-to-paste config (see `config.md`), and say the user can save it to make future runs reproducible. Don't write it into the repo yourself.
+- Mention that `<output>/_generation.json` records the commit, so that the tutorial can be checked for staleness later.
 - Integration mode: delete only `<output>/_work/`, keeping `<docs>/_quarto.yml.pre-tutorial.bak` if one was made. Also report:
   - the `_quarto.yml` diff
   - how many API links were made, and their style

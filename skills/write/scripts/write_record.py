@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""Record what a tutorial was generated from, so it can be kept up to date.
+
+Standard library only (Python 3.9+).
+
+Two subcommands:
+
+  info   Print the commit the tutorial is being generated from, as JSON. The
+         orchestrator uses it to build the footer line ("Generated from commit ...").
+
+    write_record.py info --repo <repo> [--repo-url <url>]
+
+  write  Write <out>/_generation.json (plus copies of the outline files), recording
+         the plugin version, the commit, the resolved options, and a content hash
+         for every source file each chapter or page depends on.
+
+    write_record.py write --repo <repo> --out <tutorial dir> --info <info.json>
+                          [--outline outline.yaml] [--plain-outline plain-outline.yaml]
+
+The --info file is JSON written by the orchestrator:
+
+  {
+    "project_name": "mypkg", "mode": "standalone", "format": "website",
+    "language": "English", "theme": null, "extensions": ["code-window"],
+    "repo_url": "https://github.com/me/mypkg", "docs": null, "section": null,
+    "audiences": [{"slug": "beginner", "preset": "beginner", "folder": ".", "kind": "chapters"}],
+    "chapters": [{"id": "A1", "name": "Router", "filename": "01_router.qmd",
+                  "files": ["src/router.py"], "tests": ["tests/test_router.py"]}],
+    "pages":    [{"audience": "stakeholder-public", "id": "what-it-does",
+                  "filename": "what-it-does.qmd", "evidence": ["src/router.py:10-40"]}],
+    "args": {"max_abstractions": 10, "critique": "on"}
+  }
+
+Files starting with "_" are ignored by Quarto, so the record never renders.
+Hashes are git blob hashes of the *working tree* content, so they are identical
+to `git hash-object` and need no git repository to compute.
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+RECORD_NAME = "_generation.json"
+OUTLINE_COPY = "_outline.yaml"
+PLAIN_OUTLINE_COPY = "_plain-outline.yaml"
+SCHEMA = 1
+LOCATION_SUFFIX = re.compile(r":\d+(?:-\d+)?$")
+
+
+def run_git(repo: Path, *args: str) -> str | None:
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(repo), *args],
+            capture_output=True, text=True, timeout=30, check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if out.returncode != 0:
+        return None
+    # Porcelain status lines start with a space, so only trim trailing whitespace.
+    return out.stdout.rstrip() if args and args[0] == "status" else out.stdout.strip()
+
+
+def blob_hash(path: Path) -> str | None:
+    """Git blob hash of a file's current content, or None if it is missing."""
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None
+    return hashlib.sha1(b"blob %d\0" % len(data) + data).hexdigest()
+
+
+def https_url(repo_url: str | None) -> str | None:
+    """Normalise a git remote to an https URL without .git, or None."""
+    if not repo_url or repo_url == "none":
+        return None
+    url = repo_url.strip()
+    m = re.match(r"^git@([^:]+):(.+)$", url)
+    if m:
+        url = f"https://{m.group(1)}/{m.group(2)}"
+    url = re.sub(r"^ssh://git@", "https://", url)
+    url = re.sub(r"\.git$", "", url).rstrip("/")
+    return url if url.startswith("https://") or url.startswith("http://") else None
+
+
+def commit_url(repo_url: str | None, sha: str | None) -> str | None:
+    base = https_url(repo_url)
+    if not base or not sha:
+        return None
+    if re.match(r"https?://(www\.)?(github\.com|gitlab\.com)/", base):
+        return f"{base}/commit/{sha}"
+    return None
+
+
+def source_info(repo: Path, repo_url: str | None) -> dict:
+    sha = run_git(repo, "rev-parse", "HEAD")
+    if repo_url is None:
+        repo_url = run_git(repo, "remote", "get-url", "origin")
+    status = run_git(repo, "status", "--porcelain") if sha else None
+    dirty_files = [ln[3:] for ln in status.splitlines() if len(ln) > 3] if status else []
+    return {
+        "repo_url": https_url(repo_url) or repo_url,
+        "commit": sha,
+        "short": sha[:7] if sha else None,
+        "branch": run_git(repo, "rev-parse", "--abbrev-ref", "HEAD") if sha else None,
+        "commit_date": run_git(repo, "log", "-1", "--format=%cI") if sha else None,
+        "dirty": bool(dirty_files),
+        "dirty_files": dirty_files[:20],
+        "commit_url": commit_url(repo_url, sha),
+    }
+
+
+def plugin_version() -> str | None:
+    manifest = Path(__file__).resolve().parents[3] / ".claude-plugin" / "plugin.json"
+    try:
+        return json.loads(manifest.read_text(encoding="utf-8")).get("version")
+    except (OSError, ValueError):
+        return None
+
+
+def hash_paths(repo: Path, paths: list[str]) -> list[dict]:
+    result = []
+    for raw in paths:
+        rel = LOCATION_SUFFIX.sub("", str(raw).strip()).replace("\\", "/")
+        if not rel:
+            continue
+        result.append({"path": rel, "blob": blob_hash(repo / rel)})
+    return result
+
+
+def cmd_info(args: argparse.Namespace) -> int:
+    info = source_info(Path(args.repo), args.repo_url)
+    info["date"] = dt.date.today().isoformat()
+    print(json.dumps(info, indent=2))
+    return 0
+
+
+def cmd_write(args: argparse.Namespace) -> int:
+    repo, out = Path(args.repo), Path(args.out)
+    try:
+        info = json.loads(Path(args.info).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"error: cannot read --info: {exc}", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True, exist_ok=True)
+
+    chapters = []
+    for ch in info.get("chapters", []):
+        chapters.append({
+            "id": ch.get("id"),
+            "name": ch.get("name"),
+            "filename": ch.get("filename"),
+            "files": hash_paths(repo, ch.get("files", [])),
+            "tests": hash_paths(repo, ch.get("tests", [])),
+        })
+    pages = []
+    for pg in info.get("pages", []):
+        pages.append({
+            "audience": pg.get("audience"),
+            "id": pg.get("id"),
+            "filename": pg.get("filename"),
+            "files": hash_paths(repo, pg.get("evidence", [])),
+        })
+
+    record = {
+        "schema": SCHEMA,
+        "plugin": {"name": "codebase-tutorial", "version": plugin_version()},
+        "generated_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source": source_info(repo, info.get("repo_url")),
+        "project_name": info.get("project_name"),
+        "mode": info.get("mode", "standalone"),
+        "docs": info.get("docs"),
+        "section": info.get("section"),
+        "format": info.get("format"),
+        "language": info.get("language"),
+        "theme": info.get("theme"),
+        "extensions": info.get("extensions", []),
+        "audiences": info.get("audiences", []),
+        "args": info.get("args", {}),
+        "chapters": chapters,
+        "pages": pages,
+    }
+
+    # Copy the outline files next to the record: _work/ is deleted at the end of a run,
+    # and the update step needs the abstractions and relationships it was built from.
+    for src, name in ((args.outline, OUTLINE_COPY), (args.plain_outline, PLAIN_OUTLINE_COPY)):
+        if src and Path(src).is_file():
+            shutil.copyfile(src, out / name)
+
+    (out / RECORD_NAME).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+
+    missing = [f["path"] for c in chapters for f in c["files"] if f["blob"] is None]
+    n_files = len({f["path"] for c in chapters for f in c["files"]})
+    print(f"wrote {out / RECORD_NAME}: {len(chapters)} chapters, {len(pages)} pages, "
+          f"{n_files} source files hashed, commit {record['source']['short'] or 'unknown'}"
+          f"{' (+uncommitted changes)' if record['source']['dirty'] else ''}")
+    if missing:
+        print(f"warning: {len(missing)} listed source file(s) not found: " + ", ".join(sorted(set(missing))[:10]))
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p_info = sub.add_parser("info", help="print commit info as JSON")
+    p_info.add_argument("--repo", required=True)
+    p_info.add_argument("--repo-url")
+    p_info.set_defaults(func=cmd_info)
+
+    p_write = sub.add_parser("write", help="write _generation.json")
+    p_write.add_argument("--repo", required=True)
+    p_write.add_argument("--out", required=True, help="tutorial output folder")
+    p_write.add_argument("--info", required=True, help="JSON file from the orchestrator")
+    p_write.add_argument("--outline")
+    p_write.add_argument("--plain-outline")
+    p_write.set_defaults(func=cmd_write)
+
+    args = ap.parse_args()
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
