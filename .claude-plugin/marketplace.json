@@ -1,0 +1,15 @@
+{
+  "name": "bergam0t",
+  "description": "Claude Code plugins by Sammi Rosser",
+  "owner": {
+    "name": "Sammi Rosser",
+    "url": "https://github.com/Bergam0t"
+  },
+  "plugins": [
+    {
+      "name": "codebase-tutorial",
+      "source": "./",
+      "description": "Turn a repository into a multi-chapter Quarto tutorial, or add one to an existing Quarto/quartodoc docs site."
+    }
+  ]
+}

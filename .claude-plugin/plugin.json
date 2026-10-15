@@ -1,0 +1,14 @@
+{
+  "name": "codebase-tutorial",
+  "displayName": "Codebase Tutorial",
+  "version": "1.1.0",
+  "description": "Turn a repository into a multi-chapter Quarto tutorial (book or website), or add one to an existing Quarto/quartodoc docs site. Subagents analyse the code, write chapters in parallel, critique for clarity, code fidelity and accuracy, then review and render.",
+  "author": {
+    "name": "Sammi Rosser",
+    "url": "https://github.com/Bergam0t"
+  },
+  "homepage": "https://github.com/Bergam0t/tutorial-codebase-knowledge-claude-code-skill",
+  "repository": "https://github.com/Bergam0t/tutorial-codebase-knowledge-claude-code-skill",
+  "license": "MIT",
+  "keywords": ["documentation", "tutorial", "quarto", "quartodoc", "onboarding", "codebase"]
+}
