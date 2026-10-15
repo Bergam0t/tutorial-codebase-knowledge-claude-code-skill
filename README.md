@@ -402,7 +402,7 @@ Copy [`skills/update/templates/tutorial-freshness.yml`](skills/update/templates/
 - **Snippets**: verbatim code still matches the repository (fails the job)
 - **Links**: relative links, anchors and quartodoc interlinks still resolve (fails the job)
 
-Pin `PLUGIN_REF` in the workflow to a release tag of this plugin for reproducible checks.
+The workflow pins `PLUGIN_REF` to a release tag of this plugin (currently `v1.7.0`) so checks are reproducible. Update it when you upgrade the plugin.
 
 ---
 
