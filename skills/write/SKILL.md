@@ -34,6 +34,7 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
 - `references/config.md`: the optional `.codebase-tutorial.yml` project config, and the `_generation.json` record and "generated from" footer line
 - `scripts/write_record.py`: prints commit info, and writes `_generation.json` (plugin version, commit, resolved options, per-chapter source hashes)
+- `scripts/check_drift.py`, `scripts/check_tutorial.py`: used by `/codebase-tutorial:update` and CI to find stale chapters and run every mechanical check
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
 - `scripts/check_links.py`: mechanical check of relative links, anchors, `@`-link mistakes, and quartodoc interlinks against `objects.json`
@@ -308,9 +309,9 @@ If `lightbox` was requested, add `lightbox: auto` under `format: html`.
 1. **Footer**: build the `left:` footer text from the commit info of step 2, as `config.md` describes (translated, with the short sha linked to `commit_url`, and "(plus uncommitted changes)" if `dirty`). In integration mode, add it to the attribution paragraph in `index.qmd` instead.
 2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Then run
    ```
-   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml]
+   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] --styles-dir <output>/_work
    ```
-   The record and the outline copies live in `<output>/` and survive the `_work/` cleanup. Tell the user about the warning if any listed source file was missing.
+   The record, the outline copies and the style blocks (`_styles/`) live in `<output>/` and survive the `_work/` cleanup. Tell the user about the warning if any listed source file was missing.
 
 If the critics or reviewer later change which source files a chapter cites, re-run the `write` command at the end of step 9 so the record matches the final pages.
 
@@ -363,7 +364,7 @@ If the reviewer reports unresolved **must-fix** findings, resume it once with th
   - the tutorial must stay inside the repo for its includes to resolve
   - running `python check_snippets.py --repo . --out <tutorial dir>` in CI catches source changes that would leave the prose describing the wrong lines
 - **Config**: if the target had no `.codebase-tutorial.yml`, print the resolved options as a ready-to-paste config (see `config.md`), and say the user can save it to make future runs reproducible. Don't write it into the repo yourself.
-- Mention that `<output>/_generation.json` records the commit, so that the tutorial can be checked for staleness later.
+- Mention that `<output>/_generation.json` records the commit, so the tutorial can be checked for staleness later: `/codebase-tutorial:update` refreshes just the chapters whose source changed, and `scripts/check_tutorial.py` runs the no-AI checks in CI.
 - Integration mode: delete only `<output>/_work/`, keeping `<docs>/_quarto.yml.pre-tutorial.bak` if one was made. Also report:
   - the `_quarto.yml` diff
   - how many API links were made, and their style

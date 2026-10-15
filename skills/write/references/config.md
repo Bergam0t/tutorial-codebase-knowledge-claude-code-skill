@@ -65,7 +65,7 @@ Never write a config file into the repo unasked. At the end of a run (step 10), 
 
 ## `_generation.json`
 
-Written by `scripts/write_record.py write` at the end of assembly (step 7), into the tutorial folder (`<output>/`; in integration mode, `<docs>/<section>/`). It is ignored by Quarto because the name starts with `_`. **It is kept when `_work/` is deleted.** Next to it, the script copies `_outline.yaml` (and `_plain-outline.yaml` for stakeholder audiences), because the update step needs the abstractions and relationships the tutorial was built from.
+Written by `scripts/write_record.py write` at the end of assembly (step 7), into the tutorial folder (`<output>/`; in integration mode, `<docs>/<section>/`). It is ignored by Quarto because the name starts with `_`. **It is kept when `_work/` is deleted.** Next to it, the script copies `_outline.yaml` (and `_plain-outline.yaml` for stakeholder audiences), because the update step needs the abstractions and relationships the tutorial was built from, and the style blocks into `_styles/`, so an update writes in exactly the same voice.
 
 Contents:
 
@@ -87,7 +87,7 @@ The blob hashes are those of the **working-tree content**, the same value `git h
 1. **Early (step 2)**: `write_record.py info --repo <target> --repo-url <repo_url>` prints the commit, whether the tree is dirty, and the commit URL. Use this to build the footer line below.
 2. **At assembly (step 7)**: write the `--info` JSON (see the script's docstring for the shape) into `<output>/_work/record-info.json`, then run
    ```
-   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml]
+   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] --styles-dir <output>/_work
    ```
    The `files` for each chapter come from the outline's `files`; the `tests` from its `tests` (advanced audiences); stakeholder `evidence` from `plain-outline.yaml`.
 

@@ -65,3 +65,15 @@ chapter_order:                    # every abstraction exactly once, foundational
 - **introduces / builds_on / one_line_summary** exist because chapters are written in parallel and cannot read each other. Together they give each writer a map of what has been explained and where. Keep `introduces` lists disjoint across chapters where possible.
 - **Language**: `summary`, `name`, `description`, `label`, `one_line_summary`, and `introduces` are in the target language. `id`, `files`, and `key_symbols` stay as they appear in the code.
 - Quote any YAML string containing `:` followed by a space, or a leading `#`, `*`, `&`, `!`, `[`, `{`.
+
+## `update_notes` (update mode only)
+
+When the analyst is updating an existing outline (`/codebase-tutorial:update`), it may end the file with:
+
+```yaml
+update_notes:
+  - "Router now delegates retries to the new RetryPolicy; description and key_symbols updated."
+  - "No structural change."
+```
+It is a list of short strings for the orchestrator and the user. Writers ignore it.
+

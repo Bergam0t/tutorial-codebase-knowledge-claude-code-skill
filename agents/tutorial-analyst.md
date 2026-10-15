@@ -59,3 +59,11 @@ You are adding to an existing documentation site, so read `site-profile.yaml` an
 Before writing, verify that: every listed path exists; every abstraction appears in a relationship; `chapter_order` contains each id exactly once; `builds_on` only points backwards; filenames follow the rule; and the YAML is valid (quote strings containing `: `).
 
 Write the file to the output path you were given. Then return a short summary: the abstractions in chapter order, with one line each.
+
+## Update mode
+
+If your brief includes `previous_outline` (an earlier `outline.yaml`) and `changed_files`, you are *updating* an outline after the code changed, not starting again.
+- Keep every abstraction `id`, `name`, `filename`, `xref` and the `chapter_order` unchanged unless a change below forces otherwise. Stability matters: the chapters that don't change keep their file names and cross-references.
+- Update `files`, `key_symbols`, `tests`, `description`, `relationships`, `introduces` and `one_line_summary` only where the changed files affect them. Drop paths that no longer exist.
+- Add an abstraction only if the changed files contain a substantial new component that fits none of the existing ones. Remove one only if its code is gone. Say so plainly in a final `update_notes:` list at the end of the file (strings: what changed and why). If neither is needed, `update_notes` can say "no structural change".
+- Never renumber chapters yourself. If you add or remove an abstraction, append the new one at its natural position and leave the renumbering to the orchestrator, which will decide whether a full regeneration is needed.

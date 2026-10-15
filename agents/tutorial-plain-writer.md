@@ -33,3 +33,5 @@ Hard rules (the reviewer will check them):
 - Every factual claim about behaviour, data, rules or limits is supported by `plain-outline.yaml`, the evidence, or the code. Say "not determined from the code" rather than guessing. Never state or imply legal or regulatory compliance.
 - Use only the plain component names from `plain-outline.yaml`.
 - Use only the extensions listed in `extensions.md`.
+
+**Revision mode.** If your brief includes `previous_version` and `changes`, you are updating an existing page after the code changed. Keep everything that is still true (structure, headings, plain names, wording). Change only the claims that the updated `plain-outline.yaml` and the changed code no longer support, and keep the page free of code. Don't alter links or filenames.

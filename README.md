@@ -23,6 +23,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Stakeholder presets (no code)](#stakeholder-presets-no-code)
 - [Quarto extensions](#quarto-extensions)
 - [Project config and the generation record](#project-config-and-the-generation-record)
+- [Keeping the tutorial up to date](#keeping-the-tutorial-up-to-date)
 - [Adding a tutorial to an existing Quarto / quartodoc site](#adding-a-tutorial-to-an-existing-quarto--quartodoc-site)
 - [How it works](#how-it-works)
 - [Quality checks](#quality-checks)
@@ -321,6 +322,63 @@ Things to know:
 
 ---
 
+## Keeping the tutorial up to date
+
+Code changes; tutorials go stale. Because each run records the commit and a hash of every source file each chapter depends on, you can see exactly what has drifted, and refresh only that.
+
+### See what's stale (no AI, no cost)
+
+```bash
+python skills/write/scripts/check_drift.py --repo . --tutorial docs/tutorial
+```
+
+```
+Tutorial generated from commit 813d416 on 2026-10-15; HEAD is 12 commit(s) ahead.
+  STALE  02_router.qmd: src/router.py changed
+  fresh  01_overview.qmd
+Changed since that commit but cited by no chapter (1):
+  - src/newmod.py
+1 of 2 chapters/pages stale.
+```
+
+(In a plugin install, the scripts are under the plugin's `skills/write/scripts/`.) `check_tutorial.py` runs this together with the snippet and link checks.
+
+### Refresh it
+
+```
+/codebase-tutorial:update
+```
+
+This finds the tutorial's record, then:
+1. runs the drift check
+2. asks the analyst to update the outline *in place*, keeping abstraction ids, chapter names and filenames stable
+3. asks the writers to **revise** just the affected chapters, keeping everything that is still true
+4. regenerates the overview and glossary entries if needed, and updates the "generated from" footer
+5. re-critiques only what changed (plus the neighbouring chapters, for accuracy), reviews, renders, and refreshes the record
+
+It uses the options recorded in the original run, so you don't repeat them. It never commits for you; review the diff, then commit.
+
+| Option | Meaning |
+|---|---|
+| `tutorial=<folder>` | The folder containing `_generation.json` (found automatically if there is only one) |
+| `dry_run` | Show what's stale and how many agents an update would run, then stop |
+| `critique=off` | Skip the critics (the checkers still run) |
+| `ci=install` | Offer to add the CI workflow below |
+
+If the changes add or remove a component (the set of chapters would change), an update would have to rename files and break links, so the skill stops and recommends a full `/codebase-tutorial:write` run instead.
+
+### Check freshness in CI
+
+Copy [`skills/update/templates/tutorial-freshness.yml`](skills/update/templates/tutorial-freshness.yml) to `.github/workflows/` in the documented repo and set `TUTORIAL_DIR`. On pull requests, pushes to main and weekly, it runs the three mechanical checks. These need no AI, API keys or cost:
+
+- **Freshness**: which chapters depend on changed files (listed in the job summary; set `STRICT: "true"` to fail on them)
+- **Snippets**: verbatim code still matches the repository (fails the job)
+- **Links**: relative links, anchors and quartodoc interlinks still resolve (fails the job)
+
+Pin `PLUGIN_REF` in the workflow to a release tag of this plugin for reproducible checks.
+
+---
+
 ## Adding a tutorial to an existing Quarto / quartodoc site
 
 If the project already has a Quarto documentation site, for example a [quartodoc](https://machow.github.io/quartodoc/) API reference, the skill can add the tutorial to it instead of creating a separate project:
@@ -512,6 +570,10 @@ agents/
   tutorial-plain-planner.md      # plain-language plan for stakeholder audiences
   tutorial-plain-writer.md       # one zero-code stakeholder page
 skills/
+  update/                        # → /codebase-tutorial:update
+    SKILL.md                     # refresh only the stale chapters
+    templates/
+      tutorial-freshness.yml     # GitHub Actions workflow to copy into your repo
   write/                         # → /codebase-tutorial:write
     SKILL.md                     # the orchestrator
     references/
@@ -531,6 +593,8 @@ skills/
       check_links.py             # link, anchor and interlink checker
       add_audience_switcher.py   # inserts the reading-level switcher (multi-audience)
       write_record.py            # commit info and the _generation.json record
+      check_drift.py             # which chapters depend on changed source files
+      check_tutorial.py          # drift + snippets + links in one go (CI entry point)
 CHANGELOG.md
 LICENSE                          # MIT (original + this derivative)
 README.md

@@ -16,6 +16,7 @@ Two subcommands:
 
     write_record.py write --repo <repo> --out <tutorial dir> --info <info.json>
                           [--outline outline.yaml] [--plain-outline plain-outline.yaml]
+                          [--styles-dir <_work dir>]
 
 The --info file is JSON written by the orchestrator:
 
@@ -194,6 +195,14 @@ def cmd_write(args: argparse.Namespace) -> int:
         if src and Path(src).is_file():
             shutil.copyfile(src, out / name)
 
+    # Keep the resolved style blocks too, so an update writes in exactly the same voice
+    # (this matters most for free-text audiences, whose block was written ad hoc).
+    if args.styles_dir and Path(args.styles_dir).is_dir():
+        dest = out / "_styles"
+        dest.mkdir(exist_ok=True)
+        for f in Path(args.styles_dir).glob("style*.md"):
+            shutil.copyfile(f, dest / f.name)
+
     (out / RECORD_NAME).write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
     missing = [f["path"] for c in chapters for f in c["files"] if f["blob"] is None]
@@ -221,6 +230,7 @@ def main() -> int:
     p_write.add_argument("--info", required=True, help="JSON file from the orchestrator")
     p_write.add_argument("--outline")
     p_write.add_argument("--plain-outline")
+    p_write.add_argument("--styles-dir", help="folder holding style.md / style-<slug>.md (usually _work)")
     p_write.set_defaults(func=cmd_write)
 
     args = ap.parse_args()

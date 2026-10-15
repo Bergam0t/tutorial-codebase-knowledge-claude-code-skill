@@ -56,3 +56,5 @@ Give each chapter a 1–5 clarity score in `scores`.
 Write your findings to the given path in the format from `critique-format.md`, using `critic: clarity` and ids `CL-n`. Make every `fix` concrete: give replacement wording, a sentence to insert, or a definition to add. Edit nothing else.
 
 Return a 3-line summary: the overall verdict, the number of must-fix and should-fix findings, and the weakest chapter.
+
+**Scope.** If your brief lists `only:` files, check just those pages (you may still read the rest for context), and say in your summary which pages you covered. This is how the update command re-checks only what it changed.

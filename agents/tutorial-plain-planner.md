@@ -39,3 +39,8 @@ Add an entry for every plain component name and every unavoidable technical term
 - Every page in each audience's plan is present.
 
 Write the file, then return a 4–6 line summary: the component names, how many data flows, decision points and assumptions you found, whether personal data was seen, and any page with little to say.
+
+## Update mode
+
+If your brief includes `previous_plain_outline`, you are updating an existing plan after the code changed. Keep every `plain_name`, page id and glossary entry that is still valid, unchanged, so existing pages and links stay stable. Revise only the items (flows, decision points, assumptions, dependencies, evidence locations) that the changed files affect, and add or remove components only if the outline did.
+

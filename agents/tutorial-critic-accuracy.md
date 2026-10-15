@@ -46,3 +46,5 @@ Do not flag simplifications that are honest and appropriate to the audience (e.g
 Write your findings to the given path in the format from `critique-format.md`, with `critic: accuracy` and ids `AC-n`.
 
 Return a 3-line summary: claims checked, false claims found, and the chapter with the most problems.
+
+**Scope.** If your brief lists `only:` files, check just those pages (you may still read the rest for context), and say in your summary which pages you covered. This is how the update command re-checks only what it changed.

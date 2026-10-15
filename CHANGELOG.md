@@ -2,6 +2,15 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
 
+## 1.6.0
+
+- **`/codebase-tutorial:update`**: refreshes an existing tutorial after the code changes. It reads `_generation.json`, finds the chapters whose source files changed, updates the outline in place (stable ids, names and filenames), has the writers *revise* only those chapters, regenerates the overview, glossary entries and footer if needed, re-critiques only what changed (plus neighbouring chapters for accuracy), reviews, renders and refreshes the record. It stops and recommends a full run when the set of chapters would change, and never commits.
+- **Revision mode** for the chapter writer and plain writer, **update mode** for the analyst and plain planner, and an `only:` scope for the three critics.
+- **`check_drift.py`**: lists stale chapters and unmapped changes from the generation record, with no AI.
+- **`check_tutorial.py`**: runs drift, snippet and link checks per audience folder, with a GitHub step summary and a `--strict` mode.
+- **CI template** `skills/update/templates/tutorial-freshness.yml`.
+- The record now also keeps the resolved style blocks (`_styles/`), so updates keep the original voice.
+
 ## 1.5.0
 
 - **Project config**: an optional `.codebase-tutorial.yml` in the documented repo holds audiences, format, language, extensions, include/exclude and so on, so runs are reproducible. Command-line options override it. Two free-text keys: `focus` (a hint for the analyst) and `notes` (house terminology, added to every style block). For cloned URL targets the skill shows the config and asks before applying it. New `config=` option.

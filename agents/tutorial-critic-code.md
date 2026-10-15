@@ -59,3 +59,5 @@ Illustrative does not mean free to mislead. For each illustrative block:
 Write your findings to the given path in the format from `critique-format.md`, with `critic: code-fidelity` and ids `CF-n`. Include the checker's totals in `summary`.
 
 Return a 3-line summary: blocks checked, verbatim failures, and issues with illustrative blocks.
+
+**Scope.** If your brief lists `only:` files, check just those pages (you may still read the rest for context), and say in your summary which pages you covered. This is how the update command re-checks only what it changed.

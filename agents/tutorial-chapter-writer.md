@@ -22,6 +22,8 @@ Your brief gives you: your chapter's outline entry, the full chapter list, the p
 4. Run the snippet self-check command from your brief (Bash is for this only). Fix every FAIL, then re-run until it is clean.
 5. Return a 2–3 line summary as the guide describes.
 
+**Revision mode.** If your brief includes `previous_version` (the path of the existing chapter) and `changes` (which source files changed and how), you are *updating* a chapter, not writing a new one. Read the previous version and the current source, then rewrite the file keeping everything that is still true: structure, headings, ids, analogies, wording and tabsets. Change only what the code change requires: new or removed behaviour, renamed symbols, moved or shifted lines. Re-copy every verbatim snippet from the current source (ranges move), update the explanations that describe it, and keep xrefs and filenames exactly as they are. Don't fix unrelated prose. If the change makes a section obsolete, remove it, and say so in your summary.
+
 Hard rules (the reviewer will check them):
 
 - Title formatted for the given `format`: in a book, `# Name {#<xref>}` on the first line; in a website, a front matter title and no body H1.
