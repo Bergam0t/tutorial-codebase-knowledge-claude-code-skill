@@ -68,6 +68,17 @@ Remove or convert any extension syntax that isn't listed. Fix each snippet FAIL 
 
 In integration mode, if the checker reports interlinks as unverifiable (no `objects.json`), follow the quartodoc build rule in `site-integration.md` (Verification), then re-run. If the build isn't allowed or possible, say so in the report.
 
+## 5b. Stakeholder audiences (`mode: stakeholder` in your brief)
+
+The pages are plain-language and zero-code. Read `stakeholder.md` and `plain-outline.yaml` first.
+
+- **Gate**: `check_snippets.py --no-code --out <folder>` must report **no FAILs**. Resolve every WARN too, by replacing it with the plain name. The only exception is the glossary's single "Developers call this …" mentions.
+- Every page in the audience's plan exists, in navigation order. Each opens with an `In brief` callout, answers its page's question, and is within the length guide.
+- Component names match `plain-outline.yaml` exactly and consistently across pages.
+- No issue numbers, commit IDs or paths in body text. Those belong only in the "For the technical team" callouts.
+- No claims about data handling, security, accuracy or compliance beyond what `plain-outline.yaml` and the evidence support. Soften or remove anything else.
+- Diagrams are simple flowcharts or journeys, with at most 8 boxes and plain labels.
+
 ## 6. Render
 
 **If your brief says `render: skip`** (multi-audience runs, where several reviewers work in parallel), don't render. The orchestrator renders once at the end. Skip to the report. In that case also check the multi-audience items in `multi-audience.md` (Reviewer checks), if your brief includes it.

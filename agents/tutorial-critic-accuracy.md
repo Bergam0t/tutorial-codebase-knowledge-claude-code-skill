@@ -20,7 +20,14 @@ Go through `index.qmd`, each chapter, and `glossary.qmd`. Include callouts, marg
 4. **Scope**: features, options or behaviours described that the codebase doesn't have. Watch especially for generic "frameworks usually do X" claims presented as facts about this project.
 5. **Consistency**: chapters that contradict each other or the outline. The same thing described differently in different places. In integration mode (you were given `site-profile.yaml`), also check: the tutorial doesn't contradict the site's existing pages; each API link points to the symbol the prose is actually talking about (e.g. `mypkg.route` rather than `mypkg.Router.route`); and claims about the public API agree with the reference docstrings.
 6. **External facts**: claims about languages, libraries or tools that are wrong or out of date for the versions this repo uses (check the manifests).
-7. **Evidence and rationale** (advanced audiences, when you were given `evidence.yaml`):
+7. **Plain-language claims** (stakeholder audiences, when you were given `stakeholder.md` and `plain-outline.yaml`). There's no code on these pages, so check the *claims*:
+   - Every statement about what the software does, what data it uses or sends, the rules and thresholds it applies, and its limits must match the code at the evidence locations in `plain-outline.yaml`. Check those locations, and the code itself.
+   - Flag simplifications that became false; a "roughly right" summary that misleads the reader is a **must-fix**.
+   - Flag overstated certainty, and claims about security, privacy, accuracy or compliance that the code doesn't support. Those are **must-fix** too.
+   - Real values (thresholds, defaults) must be stated correctly.
+   - Each component must be described consistently across pages.
+   - Personal-data statements must list only what the code visibly handles.
+8. **Evidence and rationale** (advanced audiences, when you were given `evidence.yaml`):
    - Every cited commit, doc, marker, issue or PR exists in `evidence.yaml` (or in the repo). Check commits with `git show --stat <sha>`, and markers at their `path:line`.
    - Each citation says what the chapter claims it says.
    - Every "why" claim is either cited or phrased as an inference. An uncited *why* stated as fact is a **should-fix**. A citation that doesn't support the claim is a **must-fix**.

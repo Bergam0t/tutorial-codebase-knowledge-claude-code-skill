@@ -17,6 +17,7 @@ Use Bash only for read-only commands: `git log`, `git show --stat`, `git blame`,
 ## 1. Repo-wide sources
 
 - **History**: run `git -C <repo> rev-parse --is-shallow-repository`, and count commits with `git -C <repo> rev-list --count HEAD`. Record `history.status` as available, shallow or none.
+- **Project signals** (if history is available): `git log -1 --format=%cs`, `git rev-list --count --since="12 months ago" HEAD`, the number of distinct authors since then (count `git log --since="12 months ago" --format=%ae | sort -u`, **counts only, never names or emails**), and the latest tag with its date. Also record whether CI config and automated tests are present, and the licence. Fill in `project_signals`.
 - **Repo docs**: CONTRIBUTING, ARCHITECTURE, DESIGN, ADR folders (`docs/adr`, `adr/`, `docs/decisions`), CHANGELOG/HISTORY, and existing design docs. Read them, and summarise the parts relevant to the abstractions in one line each.
 - **GitHub**: available only if `repo_url` is on github.com **and** `gh` is installed **and** `gh auth status` succeeds. Otherwise set `github.status: unavailable` with a specific `reason`, and skip the GitHub lookups below. Also stop the GitHub lookups, recording what you got and `reason: rate limited or network error`, if `gh` calls fail or time out.
 

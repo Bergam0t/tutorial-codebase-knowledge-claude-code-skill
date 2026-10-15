@@ -28,6 +28,9 @@ Usage:
 
   --stamp     add include-hash to included blocks that lack one
   --restamp   also overwrite hashes that no longer match (only after re-checking the prose)
+  --no-code   stakeholder (zero-code) pages: any non-mermaid code block FAILS; inline code,
+              file paths and identifier-like tokens in prose WARN (glossary.qmd is exempt
+              from the prose checks, as it may name technical components once)
 
 Exit code 0 if there are no failures, 1 otherwise. Standard library only.
 """
@@ -203,6 +206,51 @@ def check_included(repo, qmd, info, content, filename, stamp, restamp):
     return status, f"included {rel}:{start}-{end}" + (f"; {'; '.join(notes)}" if notes else ""), new_info
 
 
+INLINE_CODE = re.compile(r"`[^`\n]+`")
+LINK_TARGET = re.compile(r"\]\([^)]*\)")
+PATH_LIKE = re.compile(r"(?<![\w/])(?:[\w.-]+/)+[\w.-]+\.[A-Za-z]{1,5}\b")
+IDENT_LIKE = re.compile(r"\b(?:[a-z][a-z0-9]*_[a-z0-9_]+|[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]+)+|\w+\.\w+\(\))")
+
+
+def check_no_code(qmd):
+    """Zero-code checks for stakeholder pages."""
+    results = []
+    text = qmd.read_text(encoding="utf-8", errors="replace")
+    for line_no, info, _ in iter_blocks(text):
+        kind, lang, _f = classify(info)
+        if kind != "mermaid":
+            results.append({"file": qmd.name, "line": line_no, "kind": "code-in-plain", "lang": lang,
+                            "status": "fail", "detail": f"code block ({kind}) not allowed on a zero-code page"})
+    if qmd.name == "glossary.qmd":
+        return results
+    in_block, in_front, fence = False, False, None
+    for n, line in enumerate(text.splitlines(), 1):
+        if n == 1 and line.strip() == "---":
+            in_front = True
+            continue
+        if in_front:
+            in_front = line.strip() not in ("---", "...")
+            continue
+        m = FENCE_OPEN.match(line)
+        if in_block:
+            if m and m.group("fence")[0] == fence[0] and len(m.group("fence")) >= len(fence) and not m.group("info"):
+                in_block = False
+            continue
+        if m:
+            in_block, fence = True, m.group("fence")
+            continue
+        if line.lstrip().startswith("<!--"):
+            continue
+        prose = LINK_TARGET.sub("]()", line)
+        for kind, rx, what in (("inline-code", INLINE_CODE, "inline code"),
+                               ("path-like", PATH_LIKE, "file path"),
+                               ("identifier-like", IDENT_LIKE, "identifier-like token")):
+            for hit in rx.findall(INLINE_CODE.sub(" ", prose) if kind != "inline-code" else prose):
+                results.append({"file": qmd.name, "line": n, "kind": kind, "lang": "",
+                                "status": "warn", "detail": f"{what} in prose: {hit!r} (use the plain name; technical names belong in the glossary)"})
+    return results
+
+
 def check_file(repo, qmd, stamp=False, restamp=False):
     results = []
     text = qmd.read_text(encoding="utf-8", errors="replace")
@@ -250,6 +298,7 @@ def main():
     ap.add_argument("--json", help="also write the full report to this JSON file")
     ap.add_argument("--stamp", action="store_true", help="add include-hash to unstamped included blocks")
     ap.add_argument("--restamp", action="store_true", help="also overwrite mismatched include-hash values")
+    ap.add_argument("--no-code", action="store_true", help="zero-code checks for stakeholder pages")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -259,7 +308,10 @@ def main():
         if not qmd.is_file():
             results.append({"file": qmd.name, "line": 0, "kind": "-", "status": "fail", "detail": "file not found"})
             continue
-        results.extend(check_file(args.repo, qmd, args.stamp, args.restamp))
+        if args.no_code:
+            results.extend(check_no_code(qmd))
+        else:
+            results.extend(check_file(args.repo, qmd, args.stamp, args.restamp))
 
     counts = {s: sum(r["status"] == s for r in results) for s in ("ok", "warn", "fail")}
     kinds = {k: sum(r["kind"] == k for r in results) for k in ("verbatim", "illustrative", "included")}

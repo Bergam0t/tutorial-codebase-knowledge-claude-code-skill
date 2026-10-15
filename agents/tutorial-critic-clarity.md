@@ -28,6 +28,17 @@ Read `index.qmd` first, then every chapter in order, exactly as a newcomer would
 - **The big picture**: after the index and chapter 1, could the reader say what the project does and where to start? After the last chapter, do they have a coherent mental model?
 - **Repetition**: the same concept explained in several chapters instead of linked.
 - **Fit with the site** (integration mode, when you were given `site-profile.yaml`): you may read the site's existing pages, since a real reader sees them, but still not the source code. Does the tutorial's starting point make sense for someone arriving from the site's getting-started page? Does it repeat existing pages instead of linking to them? Is it consistent with their terminology and voice? Are the API links where a reader would want them?
+- **Stakeholder readers** (`stakeholder-*` presets; you were given `stakeholder.md`): you know **no programming at all**. Read as the preset's reader would: a manager, a domain expert, a product owner, or a member of the public. Flag:
+  - any jargon, identifier, file path or code (include the no-code check's warnings from your brief)
+  - terms used without a plain explanation
+  - pages that don't answer the question in their title
+  - weak or missing "In brief" callouts
+  - pages much longer than the guide in `stakeholder.md`
+  - condescension, especially towards domain experts
+  - vague reassurance ("secure", "accurate") without a basis on the page
+  - for `stakeholder-public`, anything above a reading age of about 12–14
+
+  Ask yourself whether, after reading, this person could make the decision or do the check the page exists for.
 - **Advanced readers** (advanced presets): here the failure modes run the other way. Flag:
   - basics over-explained, and padding
   - analogies used where the reader needs none

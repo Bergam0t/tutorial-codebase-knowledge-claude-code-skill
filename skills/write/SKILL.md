@@ -16,6 +16,8 @@ There are two modes:
 
 Either mode can also be **multi-audience** (`audience` lists more than one audience): one version of the tutorial per audience from a shared outline, each in its own subfolder, with a reading-level switcher on every page. If more than one audience is listed, read `references/multi-audience.md` before step 2. It overrides this file, and `site-integration.md`, where they differ.
 
+**Stakeholder (no-code) audiences** (`stakeholder-*`) don't get one chapter per abstraction. They get their own question-led page sets, planned by `tutorial-plain-planner` (step 5c) and written by `tutorial-plain-writer` (step 6). If any audience is a stakeholder preset, read `references/stakeholder.md` before step 2. It overrides this file for those audiences: their pages, checks and critics.
+
 **Subagent names**: this skill ships in the `codebase-tutorial` plugin, so its agents are scoped as `codebase-tutorial:<name>`. For example, `tutorial-analyst` below means subagent type `codebase-tutorial:tutorial-analyst`. Use the scoped name. Only if no scoped agent is available (a manual, non-plugin install) fall back to the bare name. If neither exists, stop and tell the user that the plugin's agents aren't installed.
 
 Reference files and scripts live in the `references/` and `scripts/` folders next to this SKILL.md (in a plugin install: `${CLAUDE_PLUGIN_ROOT}/skills/write/`). Resolve them to **absolute paths** before passing them to subagents (subagents do not know where this skill lives):
@@ -28,6 +30,7 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/site-integration.md`: integration mode, covering the site profile schema, navigation wiring, API links, and verification
 - `references/evidence.md`: the `evidence.yaml` schema and citing rules for advanced audiences, plus the "known issues" callouts
 - `references/multi-audience.md`: several audiences, covering layout, per-audience fan-out, navigation, the landing page and the switcher
+- `references/stakeholder.md`: no-code stakeholder audiences, covering the zero-code rules, the page menu, the page plan for each preset, the `plain-outline.yaml` schema, and the checks
 - `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
@@ -43,7 +46,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `docs` | none | Existing Quarto project folder (containing `_quarto.yml`), relative to the target. Switches on integration mode |
 | `section` | `tutorial` | Integration mode only: subfolder of `docs` to create the tutorial in |
 | `format` | `book` | `book` or `website`. In integration mode it is forced to the site's project type |
-| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
+| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
 | `theme` | none | Optional overlay, e.g. `1980s` |
 | `language` | `English` | Language of all generated prose |
 | `output` | `output/<project_name>` | Relative to the current working directory |
@@ -59,7 +62,7 @@ If anything essential is ambiguous (e.g. the target does not exist), ask the use
 - **No Python 3.9+**: stop. The checking scripts need it.
 - **No git**: stop if the target is a URL. Otherwise continue without source permalinks.
 - **No Quarto**: warn that the output won't be rendered or validated, and continue.
-- **Any advanced audience**: also run `gh --version` and `gh auth status`. If either fails, tell the user that GitHub issues and PRs won't be checked, and that the advanced pages will say so. Then continue.
+- **Any advanced or stakeholder audience**: also run `gh --version` and `gh auth status`. If either fails, tell the user that GitHub issues and PRs won't be checked, and that the advanced pages will say so. Then continue.
 
 Use whichever Python command worked (`python` or `python3`) in every script command you give to subagents.
 
@@ -70,7 +73,7 @@ Use whichever Python command worked (`python` or `python3`) in every script comm
 ## 2. Fetch
 
 - **Local path**: use it in place. Do not copy it.
-- **URL**: `git clone --depth 1 <url> <output>/_work/repo` and use that as the target. If any audience is advanced, use `git clone --filter=blob:none <url> <output>/_work/repo` instead. That keeps the full commit history, which the evidence step needs, while fetching file contents lazily.
+- **URL**: `git clone --depth 1 <url> <output>/_work/repo` and use that as the target. If any audience is advanced or stakeholder, use `git clone --filter=blob:none <url> <output>/_work/repo` instead. That keeps the full commit history, which the evidence step needs, while fetching file contents lazily.
 - **project_name**: last URL segment without `.git`, or the basename of the absolute local path.
 - **repo_url** (for the sidebar link): the URL argument, or `git -C <target> remote get-url origin` converted to `https://` form. If there is none, use "none".
 - **source_base_url** (for per-snippet line links): if `repo_url` is on GitHub or GitLab **and** `git -C <target> branch -r --contains HEAD` shows the commit is pushed, use `<repo_url>/blob/<full HEAD sha>/`, a permalink so line numbers stay correct. If the working tree has uncommitted changes to the source files, or the conditions aren't met, use "none".
@@ -134,13 +137,24 @@ Read `outline.yaml` and check every rule below. If you can, a quick `python -c` 
 
 On failure (other than trivially fixable filenames), resume or re-spawn the analyst **once** with the specific list of errors. If it still fails, fix what you can yourself and tell the user what you changed.
 
-## 5b. Gather evidence (only if any audience is advanced)
+## 5b. Gather evidence (only if any audience is advanced or stakeholder)
 
 Spawn one `tutorial-evidence-gatherer` with: the target, `repo_url`, the absolute paths to `outline.yaml` and `references/evidence.md`, and the output path `<output>/_work/evidence.yaml`.
 
 When it returns, check that `evidence.yaml` exists and parses. Then note `github.status` and `history.status` for the final report.
 
-In multi-audience mode, you may run this step at the same time as the writers for non-advanced audiences, because they don't need the evidence. Advanced writers must wait for it.
+In multi-audience mode, you may run this step at the same time as the writers for audiences that don't need the evidence. Advanced writers and the plain planner must wait for it.
+
+## 5c. Plan the stakeholder pages (only if any audience is a stakeholder preset)
+
+Spawn one `tutorial-plain-planner` with: the target, the stakeholder audiences, `language`, the absolute paths to `outline.yaml`, `evidence.yaml` and `references/stakeholder.md`, and the output path `<output>/_work/plain-outline.yaml`.
+
+Then validate the plan:
+- every outline abstraction has a unique `plain_name`
+- every planned page for each stakeholder audience is present
+- every `data_flows`, `decision_points` and `assumptions` item has an `evidence` location, or says "not determined from the code"
+
+On failure, resume the planner once with the errors.
 
 ## 6. Write chapters (parallel)
 
@@ -159,6 +173,14 @@ Spawn **one `tutorial-chapter-writer` per chapter, all in a single message**, so
 - the absolute path to `<output>/_work/extensions.md`. Writers use only the extensions listed there. If `include-code-files` is enabled, tell them to use `include=` (with paths relative to their own chapter file) for every verbatim excerpt.
 
 Tell each writer to write only its own file, to self-check its snippets before returning, and to return a 2–3 line summary.
+
+**Stakeholder audiences** use `tutorial-plain-writer` instead, one per page in that audience's plan (`plain-outline.yaml` → `pages`), except `glossary`, which you write in step 7. Each brief contains:
+- the preset, the page id, filename and `focus`, and the audience's full page list
+- `format`, `language`, and the output path `<output>[/<slug>]/<page file>`
+- the absolute paths to: the style block, `references/stakeholder.md`, `quarto-conventions.md`, `_work/extensions.md`, `plain-outline.yaml`, `evidence.yaml`, and the target repo
+- the no-code self-check command: `python <check_snippets.py> --repo <target> --out <folder> --file <page> --no-code`
+
+The `overview` page (`index.qmd`) is written by a plain writer too, not by you as for technical audiences. It includes the known-issues note from `evidence.md`, worded plainly.
 
 After they finish, confirm that every expected `.qmd` file exists. Re-spawn any writer whose file is missing.
 
@@ -183,6 +205,12 @@ Give the relationship diagram `%%| label: fig-overview` and `%%| fig-cap:` lines
 ### `glossary.qmd`
 
 Collect every term in every chapter's `introduces`. For each, read the chapter that introduces it and write a definition of 1–2 sentences that agrees with that chapter, in the target language, ending with a reference to the home chapter (`@sec-<xref>` in a book, a `[Name](<filename>)` link in a website). Lay it out as a Markdown definition list, sorted alphabetically, with the title rule from `quarto-conventions.md`. If there are more than about 40 terms, you may spawn one general-purpose subagent to draft it from the chapters and the outline.
+
+### Stakeholder audiences
+
+- `index.qmd` is written by a plain writer (step 6). Don't write it yourself.
+- `glossary.qmd` comes from `plain-outline.yaml` → `glossary`, as a definition list sorted alphabetically. Each entry is the plain term, its plain definition, and, if present, one sentence: "Developers call this *<technical name>*." This is the **only** place technical names appear. No code formatting, and no file paths (drop the path from `technical_name`).
+- **Navigation**: the `chapters` (book) or `sidebar.contents` (website) list follows the audience's page plan, in order, with `glossary.qmd` last. In a book, the glossary is a normal chapter for this audience, not an appendix.
 
 ### `_quarto.yml`
 
@@ -274,6 +302,8 @@ If `lightbox` was requested, add `lightbox: auto` under `format: html`.
 
 ## 8. Critique (parallel, read-only)
 
+For **stakeholder audiences**, run only the clarity and accuracy critics, plus the no-code check (`check_snippets.py --no-code --out <folder>`), whose output goes into the clarity critic's brief. Give both critics `references/stakeholder.md` and `plain-outline.yaml`, and give the accuracy critic `evidence.yaml` and the target repo too. Skip the code critic, because there's no code to check.
+
 Skip this step if `critique=off`. In multi-audience mode, run this step once per audience, over that audience's folder and with that audience's style block, writing to `_work/critique/<slug>/`. Batch those calls as `multi-audience.md` describes. Create `<output>/_work/critique/`, then spawn **all three critics in a single message**. Each one only writes its own findings file and never edits the tutorial, so they can safely run concurrently.
 
 | Subagent | Findings file | Brief also includes |
@@ -296,6 +326,8 @@ In multi-audience mode:
 - render once yourself afterwards, as `multi-audience.md` describes
 
 Otherwise, spawn **one `tutorial-reviewer`** with: the absolute output dir and target repo; `format`; `language`; `source_base_url`; the absolute paths to `outline.yaml`, `style.md`, `quarto-conventions.md`, `chapter-guide.md`, `critique-format.md`, `check_snippets.py` and `check_links.py`; `<output>/_work/extensions.md`; and the three findings files (or "none" if critique was off). In integration mode, also give it `site-profile.yaml`, `site-integration.md` and the docs folder (`--project` for the link checker). It applies the findings, runs its own checks, re-runs both checkers until they pass, and attempts `quarto render` (in integration mode, of the section folder only).
+
+For a **stakeholder audience**, also give the reviewer `references/stakeholder.md` and `plain-outline.yaml`, and say `mode: stakeholder`. It then runs `check_snippets.py --no-code` instead of the normal snippet check.
 
 If the reviewer reports unresolved **must-fix** findings, resume it once with that list. Anything still open after that goes in your final report to the user. Do not loop further.
 

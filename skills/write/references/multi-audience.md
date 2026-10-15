@@ -15,6 +15,15 @@ Patterns marked **(tested)** were verified with Quarto 1.11.
 - Slugs must be unique.
 - One audience in the list means the normal single-audience layout: no subfolders and no switcher.
 
+## Stakeholder audiences in a mixed list
+
+Stakeholder presets (`stakeholder-*`) have their own page sets with their own filenames (see `stakeholder.md`), so their folders don't mirror the chapter folders. The switcher still works:
+- `index.qmd` and `glossary.qmd` exist in every folder, and map to each other directly.
+- From any other page, the button for a folder that lacks that page opens that audience's overview, because `add_audience_switcher.py` falls back to `index.qmd`.
+- Two stakeholder audiences share filenames for the pages they have in common (e.g. `what-it-does.qmd`), so those also map directly.
+
+Wherever this file says "the same chapter filenames in every folder", read it as applying to the chapter-based audiences only.
+
 ## Constraints
 
 - **Format must be `website`.** Books number chapters across the whole book, so two versions of every chapter can't live in one book. If `format=book` was passed explicitly, ask the user whether to switch to a website or run the skill once per audience (separate books, no switcher). If no format was given, use `website` and say so.
@@ -142,6 +151,6 @@ website:
 
 ## Reviewer checks (multi-audience additions)
 
-- Every audience folder has the same set of chapter filenames as the outline, plus `index.qmd` and `glossary.qmd`.
+- Every chapter-based audience folder has the same set of chapter filenames as the outline, plus `index.qmd` and `glossary.qmd`. Each stakeholder folder has exactly its page plan from `plain-outline.yaml`.
 - Every page has exactly one switcher block. If any page lacks one, re-run the script.
 - Versions agree on facts. They may differ in depth, tone and code length, but never in what the code does. If the accuracy findings for one audience reveal an error, check that chapter in the other audiences too.

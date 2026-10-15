@@ -2,6 +2,15 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
 
+## 1.4.0
+
+- **Stakeholder audiences (no code)**: four new presets, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner` and `stakeholder-public`. Each gets its own short set of question-led, zero-code pages (from a shared page menu) instead of one chapter per abstraction. Components get plain-English names, with technical names only in the glossary.
+- New `tutorial-plain-planner` agent: translates the outline and evidence into `plain-outline.yaml` (plain names, information flows, personal data the code visibly handles, decision rules with real values, assumptions, dependencies, glossary, and page plans), with every item tied to a code location.
+- New `tutorial-plain-writer` agent and `stakeholder.md` reference: zero-code rules, the page menu, the plan for each preset, and the writing style.
+- `check_snippets.py --no-code`: fails on code blocks, and warns on inline code, paths and identifier-like tokens in prose.
+- The evidence step also records maintenance signals (recent activity, contributor counts, latest release, CI, tests, licence).
+- The critics and reviewer gained stakeholder-specific checks. Multi-audience runs can mix stakeholder and technical audiences.
+
 ## 1.3.0
 
 - **Quarto extensions**: a new `extensions=` option, and a vetted, pinned list in `extensions.md`: `code-window` and `code-line-style` (both on by default), plus `include-code-files`, `value-box`, `highlight-text` and `fontawesome`. `lightbox` maps to Quarto's built-in feature. The skill installs them with `quarto add --no-prompt`, sets the filter order (`value-box` must precede `highlight-text`), and gives writers only the syntax for what is actually installed. Unvetted `owner/repo@tag` extensions need user confirmation. In integration mode, the site's existing extensions are used, and the skill asks before adding new ones.

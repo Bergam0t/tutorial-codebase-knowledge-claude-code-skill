@@ -102,6 +102,31 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - `## Design notes`: short, focused on what helps predict behaviour.
   - `## Known issues`: from evidence (open issues and PRs, documented limitations) that affect users.
 
+## Stakeholder family (no code)
+
+There are four presets for non-technical readers: `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner` and `stakeholder-public`. They produce **their own question-led page sets** rather than one chapter per abstraction. The page plans, the zero-code rules and the writing style are all in `stakeholder.md`, which is the authority for this family. To build the style block, the orchestrator copies the shared base below, then the preset's line.
+
+### Shared base (all stakeholder presets)
+
+- **max_code_block_lines**: 0 (no code at all)
+- **max_diagram_participants**: 8 (boxes in a flowchart; no sequence, class or state diagrams)
+- **uses_evidence**: true. Limitations are translated into plain language, with no issue numbers in body text.
+- **page_plan**: true. Use the page set from `stakeholder.md`, not the chapter list.
+- **Tone**: plain English, short sentences, active voice, British English, and an "In brief" callout at the top of every page. Honest about what the code doesn't show.
+- **Analogies**: everyday ones, where they help. Never as a substitute for a fact.
+- **Quarto features**:
+  - "In brief" callouts, tables and simple flowcharts.
+  - Value boxes for a few key facts (if enabled).
+  - `[term]{.key-term}` highlighting (if enabled).
+  - No tabsets with code, and no code annotations.
+
+### Stakeholder presets
+
+- `stakeholder-decision-maker` (**Label**: Decision-makers): managers, funders and executives deciding whether to invest in, adopt or rely on it. Emphasis: value, risk, dependency and maintenance signals, and the questions to ask.
+- `stakeholder-domain-expert` (**Label**: Domain experts): subject-matter experts who must trust and sanity-check what it does in their field. Emphasis: rules, thresholds and calculations with their real values, in domain language. Never oversimplify.
+- `stakeholder-product-owner` (**Label**: Product owners): people who steer priorities and scope. Emphasis: capabilities and their limits, information flow, what's cheap or expensive to change and why, and the questions to ask.
+- `stakeholder-public` (**Label**: Public): lay readers and end users. Emphasis: what it does with their data (only what the code shows), and how to read its results. Reading age about 12–14, second person. Never imply legal compliance.
+
 ## Audience: free text
 
 The orchestrator writes a custom block with the same fields as the closest preset, tailored to the described reader. The fields are `max_code_block_lines`, `max_diagram_participants`, Reader, Tone, Code, Analogies, Depth or Structure, Quarto features, and, for advanced-style readers, `uses_evidence`, Emphasis and Extra sections. Use `beginner` as the template by default. If the description reads like an experienced engineer, use the advanced preset that best fits.
@@ -114,8 +139,12 @@ These are the short labels used for switcher buttons and navigation in multi-aud
 - `advanced-contributor`: Contributor
 - `advanced-architect`: Architect
 - `advanced-user`: Power user
+- `stakeholder-decision-maker`: Decision-makers
+- `stakeholder-domain-expert`: Domain experts
+- `stakeholder-product-owner`: Product owners
+- `stakeholder-public`: Public
 
-Free-text audiences get a short label derived from the description.
+Free-text audiences get a short label derived from the description. A free-text description of a non-technical reader becomes a custom stakeholder preset: pick the closest page plan from `stakeholder.md`.
 
 ---
 

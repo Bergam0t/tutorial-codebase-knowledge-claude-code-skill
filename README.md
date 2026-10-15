@@ -20,6 +20,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Options](#options)
+- [Stakeholder presets (no code)](#stakeholder-presets-no-code)
 - [Quarto extensions](#quarto-extensions)
 - [Adding a tutorial to an existing Quarto / quartodoc site](#adding-a-tutorial-to-an-existing-quarto--quartodoc-site)
 - [How it works](#how-it-works)
@@ -93,7 +94,7 @@ claude plugin install codebase-tutorial@bergam0t
 
 Then start a new session, or run `/reload-plugins`. Type `/codebase-tutorial:write` to check it's there.
 
-The plugin installs the skill and all eight agents together. It's installed at **user scope**, so it's available in every project on your machine.
+The plugin installs the skill and all ten agents together. It's installed at **user scope**, so it's available in every project on your machine.
 
 - **Install it for a whole team on one repository**: run `claude plugin marketplace add Bergam0t/tutorial-codebase-knowledge-claude-code-skill --scope project` in that repo, then commit the `.claude/settings.json` it writes. Each teammate still runs the install command once.
 - **Update**: new versions arrive when the plugin's `version` changes. To update now, run `/plugin marketplace update bergam0t` in a session, or `claude plugin update codebase-tutorial@bergam0t` in your shell. To update automatically, open `/plugin` → **Marketplaces** → `bergam0t` → **Enable auto-update**.
@@ -165,7 +166,7 @@ All options are `key=value` pairs after the optional target.
 |---|---|---|
 | *target* | `.` | Local path or Git URL of the repository to document |
 | `format` | `book` | `book` (numbered chapters and appendix) or `website` (sidebar navigation) |
-| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
+| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
 | `theme` | none | Optional flavour overlay. Ships with `1980s` |
 | `language` | `English` | Language of all generated prose. Code and identifiers stay as-is |
 | `output` | `output/<project>` | Where to write the standalone project |
@@ -219,6 +220,31 @@ When documenting a remote repository, the clone keeps its full commit history (`
 ```
 /codebase-tutorial:write . audience=advanced-contributor
 /codebase-tutorial:write . audience=beginner,advanced-contributor,advanced-architect
+```
+
+### Stakeholder presets (no code)
+
+These four presets are for readers with **no programming knowledge**. The pages contain no code, no file paths and no technical names. Each component gets a plain-English name ("the request handler"), and its technical name appears once, in the glossary, for anyone who later needs to talk to the developers.
+
+Instead of one chapter per component, each preset gets its **own short set of question-led pages**, and every page opens with an "In brief" summary:
+
+| Preset | For | Pages |
+|---|---|---|
+| `stakeholder-decision-maker` | Managers, funders and executives | Overview · What it does · How it works · Assumptions and limits · Risks · Keeping it running · Questions to ask · Glossary |
+| `stakeholder-domain-expert` | Subject-matter experts who need to trust and sanity-check it | Overview · What it does · How it works · How decisions are made · Reading the results · Assumptions and limits · Glossary |
+| `stakeholder-product-owner` | People who steer priorities and scope | Overview · What it does · How it works · Information flow · Changing it · Assumptions and limits · Questions to ask · Glossary |
+| `stakeholder-public` | Lay readers and end users | Overview · What it does · Your data · Reading the results · Assumptions and limits · Glossary |
+
+How it works:
+- **Planning.** A planning agent reads the code to find what stakeholders need but the technical outline doesn't capture: what information goes in and comes out, where it's stored or sent, any personal data the code visibly handles, the rules and thresholds applied (with their real values), and the assumptions built in. Every item is tied to a code location, so the accuracy critic can check it. Anything that can't be determined is stated as such, never guessed.
+- **Known limitations.** These come from the same evidence step as the advanced presets. They're translated into plain language, with issue links only in a collapsed "For the technical team" box. Decision-makers also get maintenance signals: recent activity, the number of active contributors (counts only), the latest release, and whether tests and CI exist.
+- **Checks.** `check_snippets.py --no-code` fails on any code block, and flags inline code, file paths and identifier-like words that slip into the text. The clarity critic reads as someone with no programming knowledge. The accuracy critic checks that the plain-language simplifications are still true, and that claims about data, security or accuracy are supported by the code. Pages never state or imply legal compliance.
+
+They can be combined with the other audiences, e.g. `audience=intermediate,stakeholder-decision-maker`. The switcher's overview and glossary buttons map directly between versions; other pages open the other version's overview.
+
+```
+/codebase-tutorial:write . audience=stakeholder-domain-expert
+/codebase-tutorial:write . audience=beginner,advanced-contributor,stakeholder-decision-maker,stakeholder-public
 ```
 
 ### Quarto extensions
@@ -315,12 +341,16 @@ The final report includes the exact `_quarto.yml` diff. Preview the whole site w
 │ tutorial-analyst │──▶ outline.yaml  (abstractions, relationships, chapter order)
 └──────────────────┘
           │   orchestrator validates the outline
-          ▼                     ┌────────────────────────────┐
-          │  (advanced only) ──▶│ tutorial-evidence-gatherer │──▶ evidence.yaml
-          ▼                     └────────────────────────────┘
-┌───────────────────────────────────────────┐
-│ tutorial-chapter-writer  × N  (parallel)  │──▶ 01_*.qmd … NN_*.qmd
-└───────────────────────────────────────────┘
+          ▼                                    ┌────────────────────────────┐
+          │  (advanced / stakeholder only) ──▶ │ tutorial-evidence-gatherer │──▶ evidence.yaml
+          │                                    └────────────────────────────┘
+          │                                    ┌────────────────────────────┐
+          │  (stakeholder only) ─────────────▶ │ tutorial-plain-planner     │──▶ plain-outline.yaml
+          ▼                                    └────────────────────────────┘
+┌───────────────────────────────────────────┐  ┌────────────────────────────────────┐
+│ tutorial-chapter-writer  × N  (parallel)  │  │ tutorial-plain-writer × pages      │
+│   → 01_*.qmd … NN_*.qmd                   │  │   → question-led, zero-code pages  │
+└───────────────────────────────────────────┘  └────────────────────────────────────┘
           │   orchestrator writes index.qmd, glossary.qmd, _quarto.yml
           ▼
 ┌────────────────┬────────────────┬─────────────────┐
@@ -344,7 +374,9 @@ The critics only report and never edit, so they can run at the same time safely.
 | Agent | Role | Model | Effort |
 |---|---|---|---|
 | `tutorial-site-surveyor` | Survey an existing docs site (integration mode only) | Sonnet | medium |
-| `tutorial-evidence-gatherer` | Collect design rationale and known issues: git history, docs, TODO/FIXME, GitHub issues/PRs (advanced audiences only) | Sonnet | medium |
+| `tutorial-evidence-gatherer` | Collect design rationale, known issues and maintenance signals: git history, docs, TODO/FIXME, GitHub issues/PRs (advanced and stakeholder audiences only) | Sonnet | medium |
+| `tutorial-plain-planner` | Translate the outline into a plain-language plan: component names, information flows, rules, assumptions, page plans (stakeholder audiences only) | Opus | medium |
+| `tutorial-plain-writer` | Write one zero-code stakeholder page (one instance per page) | Opus | medium |
 | `tutorial-analyst` | Choose the abstractions, relationships and chapter order | Opus | high |
 | `tutorial-chapter-writer` | Write one chapter (one instance per chapter) | Opus | medium |
 | `tutorial-critic-clarity` | Read the tutorial as the target reader would; flag confusion | Sonnet | medium |
@@ -453,7 +485,9 @@ agents/
   tutorial-critic-accuracy.md    # factual critique
   tutorial-reviewer.md           # apply fixes, enforce rules, render
   tutorial-site-surveyor.md      # survey an existing docs site
-  tutorial-evidence-gatherer.md  # rationale & known issues for advanced audiences
+  tutorial-evidence-gatherer.md  # rationale, known issues & maintenance signals
+  tutorial-plain-planner.md      # plain-language plan for stakeholder audiences
+  tutorial-plain-writer.md       # one zero-code stakeholder page
 skills/
   write/                         # → /codebase-tutorial:write
     SKILL.md                     # the orchestrator
@@ -467,6 +501,7 @@ skills/
       multi-audience.md          # switchable versions for several audiences
       evidence.md                # evidence.yaml schema and citing rules (advanced)
       extensions.md              # vetted Quarto extensions: pins, order, usage notes
+      stakeholder.md             # zero-code rules, page menu and plans, plain-outline schema
     scripts/
       check_snippets.py          # verbatim / included / illustrative snippet checker (+ drift hashes)
       check_links.py             # link, anchor and interlink checker

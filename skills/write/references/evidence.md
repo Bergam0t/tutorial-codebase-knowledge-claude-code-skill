@@ -14,6 +14,14 @@ github:
   status: checked              # checked | unavailable
   reason: ""                   # if unavailable, e.g. "gh not installed", "not a GitHub repo", "gh not authenticated", "rate limited"
   issues_url: https://github.com/owner/repo/issues   # or null
+project_signals:               # maintenance signals (used by stakeholder audiences); counts only, no names
+  last_commit: 2026-09-30
+  commits_last_12_months: 214
+  contributors_last_12_months: 4 # distinct authors, counted, never named
+  latest_release: v2.3.0 (2026-08-12)   # latest tag, or "none"
+  ci: true                       # CI config present (.github/workflows, .gitlab-ci.yml, …)
+  tests: true                    # automated tests present
+  licence: MIT                   # from LICENSE, or "none found"
 repo_docs:                     # project-wide docs that were read
   - path: CONTRIBUTING.md
     summary: Branch naming, test commands, review rules.
