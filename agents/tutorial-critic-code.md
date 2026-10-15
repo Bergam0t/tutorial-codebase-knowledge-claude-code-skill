@@ -30,6 +30,10 @@ python <check_snippets.py> --repo <repo> --out <output dir> --json <output dir>/
   - Pick whichever fits the surrounding prose better and say why.
 - **Unmarked block**: decide whether it is verbatim (find it in the repo and give the path and range) or illustrative (give the marked-up opening fence).
 - **Line-range mismatch**: give the corrected range.
+- **Included blocks** (`include=`, from the `include-code-files` extension):
+  - A missing file, or a path outside the repo, is a **must-fix**, because it renders as an empty block.
+  - A caption that disagrees with the include is a **should-fix**.
+  - Also read the included lines yourself, and check that the prose around the block describes *those* lines.
 - **Executable cell or bare mermaid**: give the corrected fence.
 
 All verbatim mismatches and unmarked blocks are **must-fix**.

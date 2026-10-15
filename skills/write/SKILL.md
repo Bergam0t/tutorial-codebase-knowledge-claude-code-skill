@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -28,6 +28,7 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/site-integration.md`: integration mode, covering the site profile schema, navigation wiring, API links, and verification
 - `references/evidence.md`: the `evidence.yaml` schema and citing rules for advanced audiences, plus the "known issues" callouts
 - `references/multi-audience.md`: several audiences, covering layout, per-audience fan-out, navigation, the landing page and the switcher
+- `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
 - `scripts/check_links.py`: mechanical check of relative links, anchors, `@`-link mistakes, and quartodoc interlinks against `objects.json`
@@ -49,6 +50,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `max_abstractions` | `10` | Upper bound; aim for 5–max |
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Default exclude: tests, docs, build/dist, vendored deps, `.venv`, `node_modules`, lockfiles, binary/media files |
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
+| `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |
 | `keep_work` | off | Keep `<output>/_work/` (outline, critiques) for debugging |
 
 If anything essential is ambiguous (e.g. the target does not exist), ask the user before proceeding. Otherwise use defaults and state them in one line.
@@ -83,6 +85,18 @@ Then read the profile:
 - **Stop and ask the user** if the section folder already exists and isn't empty, or if `_quarto.yml` couldn't be parsed.
 - Set `format` to the profile's `project_type`, and tell the user if that overrides their `format=` argument.
 - If quartodoc is present but `link_style` is `none`, warn the user that API links will be plain text. Then continue.
+
+## 2c. Quarto extensions
+
+Unless `extensions=none`, read `references/extensions.md` and follow its "Installing" section:
+1. Resolve the list, and drop anything ineligible. The Quarto version comes from the preflight.
+2. **Unvetted** extensions: ask the user before installing any.
+3. **Integration mode**: use the site's existing extensions (from `site-profile.yaml`), and ask before installing or enabling anything new in the site.
+4. Install with `quarto add … --no-prompt` into the Quarto project root.
+5. Write `<output>/_work/extensions.md`, with the usage notes for exactly what is enabled.
+6. Keep the list of filters, in order, plus any `extensions:` options, for the `_quarto.yml` in step 7.
+
+If nothing ends up enabled, write `extensions.md` saying "No extensions enabled", so writers don't use any extension syntax.
 
 ## 3. Resolve the style block
 
@@ -142,6 +156,7 @@ Spawn **one `tutorial-chapter-writer` per chapter, all in a single message**, so
 - the absolute path to `check_snippets.py`, plus the exact self-check command: `python <script> --repo <target> --out <output> --file <filename>`
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`, and the chapter's `related_pages` and `api_refs`
 - advanced audiences: the absolute paths to `evidence.yaml` and `references/evidence.md`, and the chapter's `tests`
+- the absolute path to `<output>/_work/extensions.md`. Writers use only the extensions listed there. If `include-code-files` is enabled, tell them to use `include=` (with paths relative to their own chapter file) for every verbatim excerpt.
 
 Tell each writer to write only its own file, to self-check its snippets before returning, and to return a 2–3 line summary.
 
@@ -232,6 +247,22 @@ format:
 
 Quote the title if `project_name` contains YAML-sensitive characters.
 
+**Extensions** (from step 2c), in either format, added to `_quarto.yml`:
+```yaml
+filters:                       # in the order given by extensions.md; omit if empty
+  - include-code-files
+  - code-line-style
+  - code-window
+extensions:                    # only options for enabled extensions
+  code-window:
+    style: macos
+  highlight-text:
+    styles:
+      key-term:
+        bg-colour: "#fff3bf"
+```
+If `lightbox` was requested, add `lightbox: auto` under `format: html`.
+
 ### Integration mode differences
 
 - Write `index.qmd` and `glossary.qmd` inside `<output>/`, as above. Also add a `## Further reading` list to `index.qmd`, linking the most relevant `existing_pages` and (if quartodoc is present) the reference index.
@@ -255,7 +286,7 @@ For advanced audiences:
 - also give the accuracy critic `evidence.yaml`, so it can check that every cited commit, doc, issue and marker exists and says what the chapter claims
 - tell the code critic that the style is **verbatim-first**
 
-Give every critic the absolute paths to `critique-format.md` and to its findings file. In integration mode, also give the clarity and accuracy critics `site-profile.yaml`. The clarity critic may read the existing site pages (a real reader sees them), but still not the source code. When all three return, check that each findings file exists and parses. Re-spawn any critic whose file is missing.
+Give every critic the absolute paths to `critique-format.md`, to `<output>/_work/extensions.md`, and to its findings file. In integration mode, also give the clarity and accuracy critics `site-profile.yaml`. The clarity critic may read the existing site pages (a real reader sees them), but still not the source code. When all three return, check that each findings file exists and parses. Re-spawn any critic whose file is missing.
 
 ## 9. Apply fixes, review & render
 
@@ -264,7 +295,7 @@ In multi-audience mode:
 - add `render: skip` and the path to `multi-audience.md` to each brief
 - render once yourself afterwards, as `multi-audience.md` describes
 
-Otherwise, spawn **one `tutorial-reviewer`** with: the absolute output dir and target repo; `format`; `language`; `source_base_url`; the absolute paths to `outline.yaml`, `style.md`, `quarto-conventions.md`, `chapter-guide.md`, `critique-format.md`, `check_snippets.py` and `check_links.py`; and the three findings files (or "none" if critique was off). In integration mode, also give it `site-profile.yaml`, `site-integration.md` and the docs folder (`--project` for the link checker). It applies the findings, runs its own checks, re-runs both checkers until they pass, and attempts `quarto render` (in integration mode, of the section folder only).
+Otherwise, spawn **one `tutorial-reviewer`** with: the absolute output dir and target repo; `format`; `language`; `source_base_url`; the absolute paths to `outline.yaml`, `style.md`, `quarto-conventions.md`, `chapter-guide.md`, `critique-format.md`, `check_snippets.py` and `check_links.py`; `<output>/_work/extensions.md`; and the three findings files (or "none" if critique was off). In integration mode, also give it `site-profile.yaml`, `site-integration.md` and the docs folder (`--project` for the link checker). It applies the findings, runs its own checks, re-runs both checkers until they pass, and attempts `quarto render` (in integration mode, of the section folder only).
 
 If the reviewer reports unresolved **must-fix** findings, resume it once with that list. Anything still open after that goes in your final report to the user. Do not loop further.
 
@@ -272,6 +303,10 @@ If the reviewer reports unresolved **must-fix** findings, resume it once with th
 
 - Delete `<output>/_work/` unless `keep_work` was set. (If the target was cloned there, the clone goes too.)
 - Report to the user: the output path; the chapter list; the critics' verdicts (per-chapter clarity scores, verbatim/illustrative snippet counts, false claims found); what the reviewer fixed or declined; any unresolved must-fix findings; whether `quarto render` succeeded or was skipped; and the next step: `quarto preview <output>`.
+- Also report the extensions installed (source and version), and those skipped (with the reason). If `include-code-files` was used, also say:
+  - included snippets are hash-stamped
+  - the tutorial must stay inside the repo for its includes to resolve
+  - running `python check_snippets.py --repo . --out <tutorial dir>` in CI catches source changes that would leave the prose describing the wrong lines
 - Integration mode: delete only `<output>/_work/`, keeping `<docs>/_quarto.yml.pre-tutorial.bak` if one was made. Also report:
   - the `_quarto.yml` diff
   - how many API links were made, and their style

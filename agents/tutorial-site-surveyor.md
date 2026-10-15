@@ -29,6 +29,7 @@ Your brief gives you: the target repo, the docs folder, the intended section fol
    - every documented object: names come from the inventory if `objects.json` exists, otherwise from the `sections[].contents` entries qualified with `package`. Add the page path for each where it can be determined from the built files.
    Set `link_style` to `interlinks` if the filter is configured, `relative` if not but the pages are built, otherwise `none`.
 7. **Tools**: the Quarto version, and whether `quartodoc` is importable.
+8. **Extensions**: list each `<docs>/_extensions/**/_extension.yml`, with its folder (`owner/name`), `title`, `version`, and what it `contributes` (filters, shortcodes, formats). Also record whether each of its filters is enabled in the site's `filters:`. Record these under `extensions_present`, as a list of `{name, version, contributes, enabled}`, and record the site's current `filters:` list verbatim under `filters`.
 
 Be precise: later agents act on your insertion plan and object names without re-checking them.
 

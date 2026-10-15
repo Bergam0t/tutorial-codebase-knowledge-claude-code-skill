@@ -2,6 +2,12 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
 
+## 1.3.0
+
+- **Quarto extensions**: a new `extensions=` option, and a vetted, pinned list in `extensions.md`: `code-window` and `code-line-style` (both on by default), plus `include-code-files`, `value-box`, `highlight-text` and `fontawesome`. `lightbox` maps to Quarto's built-in feature. The skill installs them with `quarto add --no-prompt`, sets the filter order (`value-box` must precede `highlight-text`), and gives writers only the syntax for what is actually installed. Unvetted `owner/repo@tag` extensions need user confirmation. In integration mode, the site's existing extensions are used, and the skill asks before adding new ones.
+- `check_snippets.py` understands `include-code-files` blocks: missing files (which render as silently empty blocks), bad ranges and caption mismatches are reported, and `--stamp`/`--restamp` record content hashes, so that later runs detect source drift.
+- The site surveyor records the extensions and filters already present.
+
 ## 1.2.0
 
 - **Advanced audiences**: three new presets, `advanced-contributor`, `advanced-architect` and `advanced-user`. They use verbatim-first code (up to 150 lines), a compressed chapter structure, a conversational expert voice, and preset-specific extra sections in every chapter (e.g. "Extending this", "Sharp edges", "Design notes", "Limitations and open questions").

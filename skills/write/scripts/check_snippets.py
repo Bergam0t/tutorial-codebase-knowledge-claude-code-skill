@@ -13,15 +13,27 @@ Every fenced code block (other than ```{mermaid}) must be one of:
                 Simplified, elided, invented-example or pseudo code. Not compared
                 to the source (critics review these by hand).
 
+  included      ```{.python include="../../src/pkg/module.py" start-line=12 end-line=30 filename="src/pkg/module.py:12-30"}
+                (quarto-ext/include-code-files) Pulled from the file at render time, so
+                exact by construction, but a wrong path renders an EMPTY block silently.
+                Checked: path exists inside the repo (relative to the .qmd), range is valid,
+                caption matches. With --stamp, an include-hash="..." of the included lines
+                is recorded; later runs fail if those lines change (drift detection).
+
 Anything else (plain ```python with no filename, executable ```{python} cells) fails.
 
 Usage:
   python check_snippets.py --repo <target repo> --out <tutorial dir> [--file NAME.qmd] [--json report.json]
+                           [--stamp] [--restamp]
+
+  --stamp     add include-hash to included blocks that lack one
+  --restamp   also overwrite hashes that no longer match (only after re-checking the prose)
 
 Exit code 0 if there are no failures, 1 otherwise. Standard library only.
 """
 import argparse
 import difflib
+import hashlib
 import json
 import re
 import sys
@@ -32,6 +44,16 @@ FENCE_OPEN = re.compile(r"^[ \t]*(?P<fence>`{3,}|~{3,})\s*(?P<info>.*?)\s*$")
 FILENAME_ATTR = re.compile(r'filename\s*=\s*"([^"]*)"')
 LINE_RANGE = re.compile(r"^(?P<path>.+?):(?P<start>\d+)(?:-(?P<end>\d+))?$")
 ANNOTATION = re.compile(r"\s*(#|//|--|;)\s*<\d+>\s*$")
+ATTR = re.compile(r'([\w-]+)\s*=\s*(?:"([^"]*)"|([^\s"}]+))')
+HASH_ATTR = re.compile(r'\s*include-hash\s*=\s*"[^"]*"')
+
+
+def attrs_of(info):
+    return {m.group(1): (m.group(2) if m.group(2) is not None else m.group(3)) for m in ATTR.finditer(info)}
+
+
+def lines_hash(lines):
+    return hashlib.sha1("\n".join(l.rstrip() for l in lines).encode("utf-8")).hexdigest()[:12]
 
 
 def iter_blocks(text):
@@ -68,6 +90,8 @@ def classify(info):
             return "executable", first, filename
         classes = [t for t in tokens if t.startswith(".")]
         lang = classes[0][1:] if classes else ""
+        if "include" in attrs_of(inner):
+            return "included", lang, filename
         if ".illustrative" in classes:
             return "illustrative", lang, filename
         return ("verbatim" if filename else "unmarked"), lang, filename
@@ -129,15 +153,74 @@ def check_verbatim(repo, filename, snip):
     return "fail", detail, diff
 
 
-def check_file(repo, qmd):
+def check_included(repo, qmd, info, content, filename, stamp, restamp):
+    """Return (status, detail, new_info_or_None)."""
+    a = attrs_of(info)
+    repo_root = Path(repo).resolve()
+    src_path = (qmd.parent / a["include"]).resolve()
+    if not src_path.is_relative_to(repo_root):
+        return "fail", f"include path leaves the repo: {a['include']}", None
+    if not src_path.is_file():
+        return "fail", f"included file not found: {a['include']} (renders as an EMPTY block)", None
+    src = src_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    try:
+        start = int(a.get("start-line", 1))
+        end = int(a.get("end-line", len(src)))
+    except ValueError:
+        return "fail", "start-line/end-line must be integers", None
+    if not (1 <= start <= end <= len(src)):
+        return "fail", f"line range {start}-{end} outside file (1-{len(src)})", None
+    rel = src_path.relative_to(repo_root).as_posix()
+    notes = []
+    if any(l.strip() for l in content):
+        notes.append("block body is ignored by include-code-files; leave it empty")
+    if filename:
+        m = LINE_RANGE.match(filename)
+        cap_path, cap_range = (m.group("path"), (int(m.group("start")), int(m.group("end") or m.group("start")))) if m else (filename, None)
+        if cap_path != rel:
+            notes.append(f'caption path "{cap_path}" differs from included file "{rel}"')
+        if cap_range and cap_range != (start, end):
+            notes.append(f"caption range {cap_range[0]}-{cap_range[1]} differs from include {start}-{end}")
+    else:
+        notes.append(f'no filename caption; use filename="{rel}:{start}-{end}"')
+    current = lines_hash(src[start - 1:end])
+    recorded = a.get("include-hash")
+    new_info = None
+    if recorded and recorded != current:
+        if restamp:
+            new_info = HASH_ATTR.sub("", info).rstrip()[:-1].rstrip() + f' include-hash="{current}"}}'
+            notes.append("hash updated (--restamp)")
+        else:
+            return "fail", (f"included lines {rel}:{start}-{end} changed since stamped "
+                            f"(hash {recorded} -> {current}); re-check the prose, then --restamp"), None
+    elif not recorded:
+        if stamp or restamp:
+            new_info = info.rstrip()[:-1].rstrip() + f' include-hash="{current}"}}'
+            notes.append("hash stamped")
+        else:
+            notes.append("not stamped (run with --stamp to enable drift detection)")
+    status = "warn" if any(not n.startswith("hash") for n in notes) else "ok"
+    return status, f"included {rel}:{start}-{end}" + (f"; {'; '.join(notes)}" if notes else ""), new_info
+
+
+def check_file(repo, qmd, stamp=False, restamp=False):
     results = []
     text = qmd.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines(keepends=True)
+    changed = False
     for line_no, info, content in iter_blocks(text):
         kind, lang, filename = classify(info)
         rec = {"file": qmd.name, "line": line_no, "kind": kind, "lang": lang, "filename": filename}
         if kind == "mermaid":
             continue
-        if kind == "bare-mermaid":
+        if kind == "included":
+            status, detail, new_info = check_included(repo, qmd, info, content, filename, stamp, restamp)
+            rec.update(status=status, detail=detail)
+            if new_info:
+                old = lines[line_no - 1]
+                lines[line_no - 1] = old.replace(info, new_info, 1)
+                changed = True
+        elif kind == "bare-mermaid":
             rec.update(status="fail", detail="use ```{mermaid} not ```mermaid")
         elif kind == "executable":
             rec.update(status="fail", detail=f"executable cell {{{lang}}}: use a plain .{lang} block")
@@ -154,6 +237,8 @@ def check_file(repo, qmd):
             if diff:
                 rec["diff"] = diff
         results.append(rec)
+    if changed:
+        qmd.write_text("".join(lines), encoding="utf-8")
     return results
 
 
@@ -163,6 +248,8 @@ def main():
     ap.add_argument("--out", required=True, help="tutorial output directory containing .qmd files")
     ap.add_argument("--file", action="append", help="check only these .qmd filenames (repeatable)")
     ap.add_argument("--json", help="also write the full report to this JSON file")
+    ap.add_argument("--stamp", action="store_true", help="add include-hash to unstamped included blocks")
+    ap.add_argument("--restamp", action="store_true", help="also overwrite mismatched include-hash values")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -172,17 +259,17 @@ def main():
         if not qmd.is_file():
             results.append({"file": qmd.name, "line": 0, "kind": "-", "status": "fail", "detail": "file not found"})
             continue
-        results.extend(check_file(args.repo, qmd))
+        results.extend(check_file(args.repo, qmd, args.stamp, args.restamp))
 
     counts = {s: sum(r["status"] == s for r in results) for s in ("ok", "warn", "fail")}
-    kinds = {k: sum(r["kind"] == k for r in results) for k in ("verbatim", "illustrative")}
+    kinds = {k: sum(r["kind"] == k for r in results) for k in ("verbatim", "illustrative", "included")}
     for r in results:
         if r["status"] != "ok":
             print(f"[{r['status'].upper()}] {r['file']}:{r['line']} ({r['kind']}) {r['detail']}")
             if r.get("diff"):
                 print(textwrap.indent(r["diff"], "    "))
     print(f"\n{len(results)} blocks checked: {counts['ok']} ok, {counts['warn']} warn, {counts['fail']} fail "
-          f"({kinds['verbatim']} verbatim, {kinds['illustrative']} illustrative)")
+          f"({kinds['verbatim']} verbatim, {kinds['included']} included, {kinds['illustrative']} illustrative)")
     if args.json:
         Path(args.json).write_text(json.dumps(results, indent=2), encoding="utf-8")
     sys.exit(1 if counts["fail"] else 0)

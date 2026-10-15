@@ -57,7 +57,14 @@ Run both checkers (use `python3` if `python` is unavailable):
 - `python <check_snippets.py> --repo <repo> --out <output dir>`
 - `python <check_links.py> --out <output dir>`. In integration mode add `--project <docs dir>`, which picks up `objects.json` for interlinks.
 
-Both must exit 0. Fix each snippet FAIL by correcting the excerpt from the source, or by marking it illustrative with a proper caption. Fix each link FAIL using the chapter list, the profile's `existing_pages` and `quartodoc.objects`, or the checker's "did you mean" hint. If nothing valid exists, remove the link and keep the text. Re-run until both are clean, up to 3 attempts. Your own edits must keep them clean.
+Both must exit 0. If `include-code-files` is enabled (see `extensions.md`), run the snippet checker with `--stamp` on your final pass, so that every included block records its `include-hash`.
+
+Also check extension usage against `extensions.md`:
+- no syntax from an extension that isn't listed: shortcodes, attributes such as `code-line-style=`, or classes such as `.value-box`
+- the `filters:` order in `_quarto.yml` matches what it says
+- `code-line-style` line numbers fall within their block
+
+Remove or convert any extension syntax that isn't listed. Fix each snippet FAIL by correcting the excerpt from the source, or by marking it illustrative with a proper caption. Fix each link FAIL using the chapter list, the profile's `existing_pages` and `quartodoc.objects`, or the checker's "did you mean" hint. If nothing valid exists, remove the link and keep the text. Re-run until both are clean, up to 3 attempts. Your own edits must keep them clean.
 
 In integration mode, if the checker reports interlinks as unverifiable (no `objects.json`), follow the quartodoc build rule in `site-integration.md` (Verification), then re-run. If the build isn't allowed or possible, say so in the report.
 

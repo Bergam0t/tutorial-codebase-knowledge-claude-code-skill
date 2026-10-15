@@ -14,6 +14,8 @@ Your brief gives you: your chapter's outline entry, the full chapter list, the p
    - the **style block** (`style.md`): audience, tone, analogies, and hard numeric limits
    - `chapter-guide.md`: chapter structure and content rules
    - `quarto-conventions.md`: front matter, code fences, mermaid, and link syntax
+   - `extensions.md` (in `_work/`): the Quarto extensions enabled for this run, with exact syntax. Use nothing that isn't listed there.
+   - **advanced audiences only**: `evidence.yaml` and `evidence.md`
    - **integration mode only**: `site-integration.md` and `site-profile.yaml`. These cover where you are in the site, how to link existing pages and the API reference, and the house style to match. Skim the `related_pages` listed for your chapter, so you link to them instead of repeating them.
 2. Read the source files listed for your abstraction, focusing on its key symbols. Grep the repo for call sites if that helps you build a realistic use case.
 3. Write the chapter, following the guide's structure and the style block, and write it to your output path. That is the only file you may create or modify.
@@ -25,6 +27,7 @@ Hard rules (the reviewer will check them):
 - Title formatted for the given `format`: in a book, `# Name {#<xref>}` on the first line; in a website, a front matter title and no body H1.
 - Cross-references use only the xrefs and filenames from your brief. Never write `[text](@sec-…)`; use `[text](#sec-…)` instead.
 - In a tabset, the "Real code" tab is verbatim and the "Simplified" tab is illustrative.
+- Extensions: use only what `extensions.md` lists, with exactly the syntax it gives. If it lists `include-code-files`, write every verbatim excerpt as an empty `include=` block, with the path relative to *your* chapter file, `start-line`/`end-line`, and the usual `filename="path:start-end"` caption. Don't paste the code.
 - Integration mode:
   - API links use the profile's `link_style` and only names from `api_refs` or `quartodoc.objects`. Link each symbol's first mention, and don't re-document parameters.
   - Links to existing pages use relative paths from your file.

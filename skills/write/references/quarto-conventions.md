@@ -64,6 +64,14 @@ Suggested captions: `Simplified from <path>`, `Example usage`, `Example output`,
 - Never translate identifiers. Comments may be translated only in illustrative blocks.
 - When in doubt, mark it illustrative. An honest "simplified" label is always better than a near-miss "verbatim" one.
 
+### Included excerpts (only when `include-code-files` is enabled)
+
+A third kind of block, **included**, is verbatim by construction: an empty block with `include="<path relative to this .qmd>" start-line=… end-line=…` plus the usual `filename="path:start-end"` caption. Its full syntax and rules are in `extensions.md`. Use it for verbatim excerpts **only** if `_work/extensions.md` lists the extension.
+
+## Extensions
+
+Use only the extensions listed in `_work/extensions.md` for this run, with exactly the syntax given there. Syntax from an extension that isn't installed either breaks the render (shortcodes) or silently does nothing (attributes and classes).
+
 ## Diagrams
 
 - Mermaid diagrams use Quarto's cell syntax: ```` ```{mermaid} ````, **not** ```` ```mermaid ````.

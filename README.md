@@ -20,6 +20,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Options](#options)
+- [Quarto extensions](#quarto-extensions)
 - [Adding a tutorial to an existing Quarto / quartodoc site](#adding-a-tutorial-to-an-existing-quarto--quartodoc-site)
 - [How it works](#how-it-works)
 - [Quality checks](#quality-checks)
@@ -171,6 +172,7 @@ All options are `key=value` pairs after the optional target.
 | `max_abstractions` | `10` | Upper bound on chapters (it aims for 5 to this number) |
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Tests, docs, build output, vendored deps, lockfiles and binaries are excluded by default |
 | `critique` | `on` | `off` skips the three critic agents (faster and cheaper; the mechanical checks still run) |
+| `extensions` | `code-window`, `code-line-style` | Quarto extensions to install and use. `none`, an explicit list, `+name` / `-name` to change the defaults, or `owner/repo@tag` for others. See [Quarto extensions](#quarto-extensions) |
 | `keep_work` | off | Keep `_work/` (the outline, style block and critic findings) for inspection |
 | `docs` | none | Integration mode: the path to an existing Quarto project to add the tutorial to (see below) |
 | `section` | `tutorial` | Integration mode: the subfolder of `docs` to create |
@@ -218,6 +220,36 @@ When documenting a remote repository, the clone keeps its full commit history (`
 /codebase-tutorial:write . audience=advanced-contributor
 /codebase-tutorial:write . audience=beginner,advanced-contributor,advanced-architect
 ```
+
+### Quarto extensions
+
+The skill installs Quarto extensions into the tutorial project with `quarto add`, configures them, and tells the writers exactly how to use them. Each vetted extension is pinned to a release:
+
+| Extension | What it adds | Default? |
+|---|---|---|
+| [`code-window`](https://github.com/mcanouil/quarto-code-window) | Frames code blocks as application windows, titled with the snippet's file caption. Needs Quarto ≥ 1.10.19 | ✔ |
+| [`code-line-style`](https://github.com/EmilHvitfeldt/quarto-code-line-style) | Highlights, focuses or dims specific lines in a block, so excerpts can stay complete while pointing at what matters | ✔ |
+| [`include-code-files`](https://github.com/quarto-ext/include-code-files) | Pulls verbatim excerpts straight from the source by line range (see below) | |
+| [`value-box`](https://github.com/bergam0t/quarto-value-box) | Value boxes for a few key, verifiable figures (overview facts, performance numbers) | |
+| [`highlight-text`](https://github.com/mcanouil/quarto-highlight-text) | Highlights key terms on first use. Needs Quarto ≥ 1.10.19 | |
+| [`fontawesome`](https://github.com/quarto-ext/fontawesome) | Font Awesome 6 icons | |
+| `lightbox` | Click-to-zoom images. Built into Quarto ≥ 1.4, so nothing is installed. Images only, not diagrams | |
+
+```
+/codebase-tutorial:write . extensions=+value-box,+fontawesome
+/codebase-tutorial:write . extensions=include-code-files,code-window
+/codebase-tutorial:write . extensions=none
+```
+
+- **Other extensions:** pass `owner/repo@tag`. The skill asks before installing anything outside the vetted list, because extension filters run code on every render. It then works out the usage notes from the extension's own files.
+- **Filter order:** the skill orders filters correctly. For example, `value-box` must run before `highlight-text`, or the value boxes silently lose their colours.
+- **If an install fails:** the skill skips that extension, so writers never use syntax for something that isn't installed.
+- **Integration mode:** extensions the docs site already has are used as they are. The skill asks before adding a new one to your site.
+
+**About `include-code-files`.** Included excerpts can't contain copying mistakes, but they need care:
+- **Location:** it's only enabled when the tutorial lives inside the repository it documents, because includes are relative paths.
+- **Missing files:** a wrong path renders as a silently empty block. The snippet checker catches this.
+- **Drift:** the checker records a hash of each included excerpt (`--stamp`). If the source later changes under a tutorial, running `python skills/write/scripts/check_snippets.py --repo . --out <tutorial dir>` in CI fails, so prose describing the old lines doesn't go unnoticed.
 
 ### Multiple audiences
 
@@ -389,6 +421,10 @@ Everything is plain Markdown. Edit a clone and load it with `claude --plugin-dir
 pip install "griffe<1.10"
 ```
 
+**An extension failed to install.** `quarto add` needs network access to GitHub. The run continues without that extension, and the final report lists it as skipped. Re-run once you're online, or install it yourself with `quarto add <source>` in the tutorial folder.
+
+**`code-window` or `highlight-text` was skipped.** Both need Quarto 1.10.19 or newer. Update Quarto from <https://quarto.org/docs/get-started/>.
+
 **`quartodoc build` can't find your package.** quartodoc needs the package to be importable. Install it (`pip install -e .`) or set `PYTHONPATH` to the folder that contains it.
 
 **Interlinks show as plain code instead of links.** The name isn't in `objects.json`, either because the reference hasn't been built yet or because the name is wrong. Run `quartodoc build`, then `check_links.py` to see which names fail.
@@ -430,8 +466,9 @@ skills/
       site-integration.md        # integration mode rules and site-profile schema
       multi-audience.md          # switchable versions for several audiences
       evidence.md                # evidence.yaml schema and citing rules (advanced)
+      extensions.md              # vetted Quarto extensions: pins, order, usage notes
     scripts/
-      check_snippets.py          # verbatim / illustrative snippet checker
+      check_snippets.py          # verbatim / included / illustrative snippet checker (+ drift hashes)
       check_links.py             # link, anchor and interlink checker
       add_audience_switcher.py   # inserts the reading-level switcher (multi-audience)
 CHANGELOG.md
