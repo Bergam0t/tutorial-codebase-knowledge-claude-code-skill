@@ -619,7 +619,8 @@ skills/
       check_snippets.py          # verbatim / included / illustrative snippet checker (+ drift hashes)
       check_links.py             # link, anchor and interlink checker
       add_audience_switcher.py   # inserts the reading-level switcher (multi-audience)
-      write_record.py            # commit info and the _generation.json record
+      relayout.py                # move a flat tutorial into an audience folder, re-basing links
+      write_record.py            # commit info, and write/extend the _generation.json record
       check_drift.py             # which chapters depend on changed source files
       check_tutorial.py          # drift + snippets + links in one go (CI entry point)
 CHANGELOG.md
