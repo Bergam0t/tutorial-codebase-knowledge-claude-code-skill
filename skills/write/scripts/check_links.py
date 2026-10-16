@@ -127,7 +127,11 @@ def main():
             all_anchors |= anchors_in(q, cache)
 
     results = []
-    for qmd in sorted(out.glob("*.qmd")):
+    # Recurse so multi-audience tutorials (one subfolder per audience) are covered in full;
+    # skip "_"- and "."-prefixed folders (_work, _extensions, _site, .quarto), which Quarto ignores.
+    for qmd in sorted(out.rglob("*.qmd")):
+        if any(part.startswith(("_", ".")) for part in qmd.relative_to(out).parts[:-1]):
+            continue
         results.extend(check_file(qmd, project, inventory, cache, all_anchors))
 
     counts = {s: sum(r["status"] == s for r in results) for s in ("ok", "warn", "fail")}

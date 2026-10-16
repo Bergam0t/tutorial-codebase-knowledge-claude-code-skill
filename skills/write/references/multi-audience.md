@@ -61,6 +61,8 @@ Wherever this file says "the same chapter filenames in every folder", read it as
    - the self-check command with `--out <output>/<slug>`
 
    Links stay within the audience folder (the filenames in the chapter list are relative, so they already do). Writers must **not** link to other audience folders or add a switcher; the orchestrator adds it. Spawn writers in parallel, with up to about 12 Agent calls per message, grouping by audience when there are more.
+
+   **One folder deeper.** Every page now sits in `<slug>/`, one level below where `site-integration.md` and `quarto-conventions.md` assume a tutorial page is. Tell each writer its exact output path and say: relative links to existing site pages and the quartodoc reference (`link_style: relative`) start with `../../` instead of `../`, and `include=` paths are relative to the page's own folder. Interlinks (`` [](`~pkg.Obj`) ``) are unaffected, because Quarto resolves them from the inventory (tested at this depth). `check_links.py` catches a link that missed the extra `../`.
 4. **Assemble** (the generation record, `_generation.json`, is written once for the whole tutorial, with every audience listed), for each audience: write `<slug>/index.qmd` and `<slug>/glossary.qmd` exactly as in single-audience mode (in website form), with the glossary definitions pitched at that audience. Then write the landing page and config (below), then run the switcher script:
    ```
    python <scripts>/add_audience_switcher.py --root <output> --audiences "beginner=Beginner,intermediate=Intermediate" --label "Reading level"
