@@ -40,6 +40,13 @@ Add an entry for every plain component name and every unavoidable technical term
 
 Write the file, then return a 4–6 line summary: the component names, how many data flows, decision points and assumptions you found, whether personal data was seen, and any page with little to say.
 
+## Add-audience mode
+
+If your brief includes `previous_plain_outline` and `new_audiences` (and no `changed_files`), the code has not changed: a tutorial already exists, and you are planning pages for extra stakeholder audiences only. Start from the previous file and keep everything in it unchanged: `plain_name`s, `plain_role`s, `data_flows`, `personal_data`, `decision_points`, `assumptions`, `dependencies`, glossary entries, and the page plans of audiences that already have one. Read the code only to check the facts the new pages will lean on.
+- Add a page plan for each audience in `new_audiences`, as in section 3 (including the `briefing` page when your brief sets `briefing`). If a new page needs something the previous plan doesn't hold, add that item with its `evidence` location rather than changing existing ones.
+- Add glossary entries only for terms the new pages need that aren't already there.
+- Write the full file (previous content plus your additions) to the output path, and say in your summary which audiences and items you added.
+
 ## Update mode
 
 If your brief includes `previous_plain_outline`, you are updating an existing plan after the code changed. Keep every `plain_name`, page id and glossary entry that is still valid, unchanged, so existing pages and links stay stable. Revise only the items (flows, decision points, assumptions, dependencies, evidence locations) that the changed files affect, and add or remove components only if the outline did.

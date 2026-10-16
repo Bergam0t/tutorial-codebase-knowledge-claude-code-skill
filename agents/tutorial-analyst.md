@@ -61,6 +61,10 @@ Before writing, verify that: every listed path exists; every abstraction appears
 
 Write the file to the output path you were given. Then return a short summary: the abstractions in chapter order, with one line each.
 
+## Tests-only mode
+
+If your brief includes `previous_outline` and `tests_only: true`, an existing outline predates the always-filled `tests` field, and a new audience needs it. Change **nothing else**: copy the previous file to the output path and add (or fill in) only each abstraction's `tests`, found as described in section 2. Keep every other field, including `description` and `summary`, exactly as it was. Return a one-line summary of how many abstractions now have tests.
+
 ## Update mode
 
 If your brief includes `previous_outline` (an earlier `outline.yaml`) and `changed_files`, you are *updating* an outline after the code changed, not starting again.

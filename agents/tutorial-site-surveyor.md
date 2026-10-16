@@ -31,6 +31,14 @@ Your brief gives you: the target repo, the docs folder, the intended section fol
 7. **Tools**: the Quarto version, and whether `quartodoc` is importable.
 8. **Extensions**: list each `<docs>/_extensions/**/_extension.yml`, with its folder (`owner/name`), `title`, `version`, and what it `contributes` (filters, shortcodes, formats). Also record whether each of its filters is enabled in the site's `filters:`. Record these under `extensions_present`, as a list of `{name, version, contributes, enabled}`, and record the site's current `filters:` list verbatim under `filters`.
 
+## Refresh mode (only when your brief says `existing_tutorial: true`)
+
+A generated tutorial already lives in `<docs>/<section>/`, and the orchestrator is adding to it. Survey as above, with these changes:
+- **The section folder is not a blocker.** Don't flag it. Leave everything under `<docs>/<section>/` out of `existing_pages`.
+- **Find the tutorial's own navigation entries** and record them under `navigation.tutorial_entries`: each navbar item, sidebar (with its `id`) or book part whose `href`, `contents` or `chapters` point into `<section>/`. Quote each one verbatim with its line numbers and indentation, so the orchestrator can edit exactly those lines and nothing else. Say whether the tutorial's sidebar is in `_quarto.yml` itself or in a metadata file.
+- Write `insertion_plan: "n/a (tutorial already present)"`.
+- Note under `navigation.details` any hand-written page or `_quarto.yml` entry **outside** the section that links into `<section>/` (use Grep for `<section>/`), with its path and line. Don't change those files; the orchestrator reports them.
+
 Be precise: later agents act on your insertion plan and object names without re-checking them.
 
 Write the profile, then return a 4–6 line summary: the project type, the navigation pattern, the quartodoc status and link style, the number of existing pages, and any blockers (such as an existing section folder).

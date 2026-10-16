@@ -152,6 +152,20 @@ website:
 - The buttons use Bootstrap classes that Quarto's HTML themes already include, so no extra CSS or JavaScript is needed.
 - Never edit the switcher by hand. Re-run the script instead.
 
+## Changing an existing tutorial's navigation (used by `/codebase-tutorial:add-audience`)
+
+When an audience is added after the first run, the navigation the first run wrote has to change. Edit with the Edit tool, replacing **only the lines the tutorial itself inserted**. Never load and re-dump `_quarto.yml` with a YAML library, which would strip comments and reorder keys. Back the file up first, and afterwards check that it still parses and that the diff against the backup removes or adds only tutorial lines.
+
+**Flat to multi-audience, standalone `_quarto.yml`** (website): replace the `website:` block's `sidebar:` mapping (`style`, `contents`, `tools`) with the `navbar` and per-audience `sidebar` list from "Navigation" above, with the existing audience's pages under `<old-slug>/`. Keep `title`, `page-navigation`, `page-footer` and every key outside `website:` as they are.
+
+**Flat to multi-audience, integration mode.** The first run inserted two things into `<docs>/_quarto.yml` (see `site-integration.md`). Replace each in place:
+1. The navbar item `- href: <section>/index.qmd` / `text: Tutorial` becomes the menu from "Navigation" (leave its position in `navbar.left` alone).
+2. The sidebar with `id: <section>` becomes one sidebar per audience, ids `<section>-<slug>`, contents prefixed `<section>/<slug>/`. It stays in the same place: a `website.sidebar` list, or the section appended to a single sidebar's `contents` (in which case replace that `- section: "Tutorial"` entry with one `- section:` per audience). Nothing else in the file changes, and quartodoc's own sidebar (`reference/_sidebar.yml`) is never touched.
+
+**Adding to a tutorial that is already multi-audience**: add one menu item (or navbar item) and one sidebar for the new audience, copying the pattern of the existing ones.
+
+`<section>/index.qmd` stays the tutorial's front door: it becomes the landing page, so links to it from the rest of the site keep working. Old chapter URLs are kept alive by `aliases` redirects (`relayout.py --alias`, tested: Quarto writes `_site/<section>/01_x.html` redirecting to the default audience's page). Hand-written pages outside the section that link to an old chapter *source* path (`<section>/01_x.qmd`) are not redirected at the source level; the skill lists them for the user rather than editing the site's pages.
+
 ## Reviewer checks (multi-audience additions)
 
 - Every chapter-based audience folder has the same set of chapter filenames as the outline, plus `index.qmd` and `glossary.qmd`. Each stakeholder folder has exactly its page plan from `plain-outline.yaml`.

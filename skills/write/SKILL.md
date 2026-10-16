@@ -34,7 +34,8 @@ Reference files and scripts live in the `references/` and `scripts/` folders nex
 - `references/extensions.md`: the vetted Quarto extensions (pinned sources, filter order, exact usage notes), how to install them, and how to handle unvetted ones
 - `references/learning.md`: opt-in learning aids (self-tests, exercises, reading paths, first-contribution list)
 - `references/config.md`: the optional `.codebase-tutorial.yml` project config, and the `_generation.json` record and "generated from" footer line
-- `scripts/write_record.py`: prints commit info, and writes `_generation.json` (plugin version, commit, resolved options, per-chapter source hashes)
+- `scripts/write_record.py`: prints commit info, writes `_generation.json` (plugin version, commit, resolved options, per-chapter source hashes), and (`extend`, for `/codebase-tutorial:add-audience`) changes an existing record's audiences
+- `scripts/relayout.py`: moves a flat tutorial into an audience subfolder and re-bases its relative links (used by `/codebase-tutorial:add-audience`)
 - `scripts/check_drift.py`, `scripts/check_tutorial.py`: used by `/codebase-tutorial:update` and CI to find stale chapters and run every mechanical check
 - `scripts/add_audience_switcher.py`: inserts or refreshes the reading-level switcher on every page of a multi-audience tutorial
 - `scripts/check_snippets.py`: mechanical check that verbatim snippets match the repo (standard library only; run with `python` or `python3`)
@@ -375,7 +376,7 @@ If the reviewer reports unresolved **must-fix** findings, resume it once with th
   - running `python check_snippets.py --repo . --out <tutorial dir>` in CI catches source changes that would leave the prose describing the wrong lines
 - **Config**: if the target had no `.codebase-tutorial.yml`, print the resolved options as a ready-to-paste config (see `config.md`), and say the user can save it to make future runs reproducible. Don't write it into the repo yourself.
 - If a briefing was produced, list the files (`briefing.pdf`, `briefing.docx`) and where they are. If their render failed, give the command to run.
-- Mention that `<output>/_generation.json` records the commit, so the tutorial can be checked for staleness later: `/codebase-tutorial:update` refreshes just the chapters whose source changed, and `scripts/check_tutorial.py` runs the no-AI checks in CI.
+- Mention that `<output>/_generation.json` records the commit, so the tutorial can be checked for staleness later: `/codebase-tutorial:update` refreshes just the chapters whose source changed, `/codebase-tutorial:add-audience` adds another voice or reading level later without repeating the analysis, and `scripts/check_tutorial.py` runs the no-AI checks in CI.
 - Integration mode: delete only `<output>/_work/`, keeping `<docs>/_quarto.yml.pre-tutorial.bak` if one was made. Also report:
   - the `_quarto.yml` diff
   - how many API links were made, and their style

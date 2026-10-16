@@ -26,6 +26,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 - [Quarto extensions](#quarto-extensions)
 - [Project config and the generation record](#project-config-and-the-generation-record)
 - [Keeping the tutorial up to date](#keeping-the-tutorial-up-to-date)
+- [Adding another audience later](#adding-another-audience-later)
 - [Adding a tutorial to an existing Quarto / quartodoc site](#adding-a-tutorial-to-an-existing-quarto--quartodoc-site)
 - [How it works](#how-it-works)
 - [Quality checks](#quality-checks)
@@ -349,6 +350,38 @@ Things to know:
 
 ---
 
+## Adding another audience later
+
+You don't have to decide on every audience up front. Once a tutorial exists, add a new voice (another reading level, a contributor version, a no-code stakeholder version) without analysing the code again:
+
+```
+/codebase-tutorial:add-audience audience=advanced-contributor
+/codebase-tutorial:add-audience audience=stakeholder-decision-maker tutorial=docs/tutorial
+```
+
+It reuses what the first run stored beside the tutorial (the outline, the evidence, the stakeholder plan and the style blocks), so only the new audience's writers, critics and reviewer run. It first checks that the existing pages are still current (if the code has moved on, it asks you to run `/codebase-tutorial:update` first, so the versions agree).
+
+If the tutorial has **one audience**, it asks what you want:
+
+| Choice | What happens |
+|---|---|
+| **Convert to multi-audience** (recommended) | The existing pages move into a folder for their audience, the new one sits beside it, and every page gets the reading-level switcher. Old page URLs keep working through redirects. |
+| **Replace the existing voice** | The new voice overwrites the existing pages and the tutorial stays flat, with the same URLs and navigation. The old version survives only in git history. |
+| **Separate tutorial** | The new voice becomes its own tutorial in a new folder (or a second section of your site), and the first is left alone. |
+
+If the tutorial already has several audiences, the new one is simply added.
+
+**In an existing Quarto / quartodoc site** the same choices work, with these safeguards:
+- Only the tutorial's own lines in `<docs>/_quarto.yml` change (its navbar item and sidebar), by text edit, with a backup and a diff check. quartodoc's sidebar, the reference pages and `objects.json` are never touched.
+- Links from the tutorial to your existing pages, to the API reference and to `include=` source files are re-based for the extra folder, and quartodoc interlinks keep resolving.
+- Your own pages that link to an old chapter's source path aren't edited: you get a list of them with the new paths. (Readers following old URLs are redirected.)
+- A site that is a Quarto **book** can't hold two versions of a chapter, so there you can replace the voice or make a separate section.
+- A standalone **book** can be converted too, but it first becomes a website, which rewrites each existing chapter in website form (keeping its voice).
+
+Options: `audience=` (required), `layout=ask|convert|replace|separate`, `tutorial=`, `critique=`, `dry_run`, `keep_work`. Tutorials made before this release lack some stored files; `add-audience` fills in what it needs (it may re-run the evidence step once).
+
+---
+
 ## Keeping the tutorial up to date
 
 Code changes; tutorials go stale. Because each run records the commit and a hash of every source file each chapter depends on, you can see exactly what has drifted, and refresh only that.
@@ -392,7 +425,7 @@ It uses the options recorded in the original run, so you don't repeat them. It n
 | `critique=off` | Skip the critics (the checkers still run) |
 | `ci=install` | Offer to add the CI workflow below |
 
-If the changes add or remove a component (the set of chapters would change), an update would have to rename files and break links, so the skill stops and recommends a full `/codebase-tutorial:write` run instead.
+If the changes add or remove a component (the set of chapters would change), an update would have to rename files and break links, so the skill stops and recommends a full `/codebase-tutorial:write` run instead. To add a new *audience* rather than refresh the existing ones, see [Adding another audience later](#adding-another-audience-later).
 
 ### Check freshness in CI
 
@@ -596,6 +629,8 @@ agents/
   tutorial-plain-planner.md      # plain-language plan for stakeholder audiences
   tutorial-plain-writer.md       # one zero-code stakeholder page
 skills/
+  add-audience/                  # → /codebase-tutorial:add-audience
+    SKILL.md                     # add a voice to an existing tutorial, reusing the stored analysis
   update/                        # → /codebase-tutorial:update
     SKILL.md                     # refresh only the stale chapters
     templates/

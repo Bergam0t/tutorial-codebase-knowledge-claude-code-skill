@@ -81,6 +81,7 @@ Contents:
 | `audiences` | Each audience's `slug`, `preset`, `folder` and `kind` (`chapters` or `stakeholder`) |
 | `args` | Other resolved options (`max_abstractions`, `include`, `exclude`, `critique`, `focus`, `notes`) |
 | `chapters` | For each chapter: `id`, `name`, `filename`, and the source `files` and `tests` it depends on, each with the git blob hash of its content when the chapter was written |
+| `history` | Added by `/codebase-tutorial:add-audience`: a log of audience changes (`at`, `plugin`, `action`, `audiences`, `note`). Absent until the first one |
 | `pages` | For stakeholder pages: `audience`, `id`, `filename` and the source files cited as evidence, with hashes |
 
 The blob hashes are those of the **working-tree content**, the same value `git hash-object <file>` prints. A later run can therefore tell exactly which chapters depend on a file that has changed, without needing git history.
