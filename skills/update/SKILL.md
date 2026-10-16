@@ -29,7 +29,7 @@ Preflight, in one Bash call: `python --version` (or `python3`), `git --version`,
 
 If `tutorial` wasn't given, search the target (depth ≤ 4, skipping `.git`, `node_modules`, `.venv`) for `_generation.json`. If there are several, ask which. If there is none, tell the user the tutorial was made before the record existed (plugin < 1.5.0) or isn't a generated one, and suggest `/codebase-tutorial:write` to create it (it will also write the record). Stop.
 
-Read the record. From it, take the resolved options (`format`, `language`, `theme`, `extensions`, `audiences`, `mode`, `docs`, `section`, `args`) and **use those, not today's defaults**. Take the style blocks from `<tutorial>/_styles/`. If the record's plugin version is older than this plugin's, mention it (new features may not apply to the old pages).
+Read the record. It is `schema` 1 or 2; schema 1 lacks `source_base_url` and the stored `_evidence.yaml` and `_site-profile.yaml`, so fall back as the steps below say. From it, take the resolved options (`format`, `language`, `theme`, `extensions`, `audiences`, `mode`, `docs`, `section`, `args`) and **use those, not today's defaults**. Take the style blocks from `<tutorial>/_styles/`. If the record's plugin version is older than this plugin's, mention it (new features may not apply to the old pages).
 
 ## 3. Drift check
 
@@ -53,7 +53,7 @@ Validate the result with the rules in write step 5. Then compare it with the pre
 - **Abstractions added or removed, or the order changed**: this is a *structural* change, and renumbering would rename every file and break links. Stop. Show the analyst's `update_notes`, and recommend a full `/codebase-tutorial:write` run (the record's options will be a good starting point). Do not continue unless the user explicitly asks.
 
 If any audience is advanced or a stakeholder preset, also:
-- re-run the evidence step (write step 5b) into `<tutorial>/_work/evidence.yaml`
+- refresh the evidence (write step 5b) into `<tutorial>/_work/evidence.yaml`. If `<tutorial>/_evidence.yaml` exists (schema 2 records and later), spawn `tutorial-evidence-gatherer` in **update mode**: `previous_evidence` = that file, plus the updated outline and the `changed_files` from `drift.json`. It re-gathers only the abstractions whose files changed, and refreshes the repo-wide and GitHub parts. If there is no stored copy (a schema 1 record), run the full step 5b.
 - for stakeholder audiences, spawn `tutorial-plain-planner` in **update mode** (`previous_plain_outline` = `<tutorial>/_plain-outline.yaml`, output `_work/plain-outline.yaml`), and validate as in write step 5c. If the page set changed, treat it as structural.
 
 ## 5. Decide what to rewrite
@@ -100,7 +100,7 @@ As in write step 9: one `tutorial-reviewer` (per audience in multi-audience mode
 
 ## 10. Refresh the record
 
-Re-run `write_record.py write` (as in write step 7, with the updated outline and plain-outline copies and the `_styles` dir), so the record's commit, hashes and timestamp describe the tutorial as it now is. Then run:
+Re-run `write_record.py write` (as in write step 7, with the updated outline, plain-outline, evidence and, in integration mode, site-profile copies, and the `_styles` dir), so the record's commit, hashes and timestamp describe the tutorial as it now is. Carry `source_base_url` over from the old record unless the commit changed and the new one is a pushed permalink (write step 2). Re-writing a schema 1 record upgrades it to schema 2. Then run:
 
 ```
 python <write>/scripts/check_drift.py --repo <target> --tutorial <tutorial>

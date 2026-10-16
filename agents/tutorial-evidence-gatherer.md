@@ -42,6 +42,14 @@ Write `evidence.yaml` to the output path, with `gathered_on` set to today's date
 - per abstraction, the counts of rationale items, markers and issues
 - anything notable, such as a FIXME that matches an open issue
 
+## Update mode (only when your brief gives `previous_evidence` and `changed_files`)
+
+You are refreshing an earlier `evidence.yaml` after the code changed, not starting again.
+- Copy the previous file as your starting point. Redo section 1 (repo-wide sources, `project_signals`, GitHub status) in full, because those change without the code changing, and set `gathered_on` to today.
+- Redo section 2 only for abstractions in the updated `outline.yaml` that are new, or that have a path in `changed_files` among their `files`. Replace those abstractions' entries completely. Keep every other abstraction's entry as it was, except that open issues and PRs (the part that goes stale fastest) are re-queried for all of them if GitHub is available.
+- Drop entries for abstractions no longer in the outline, and re-check any kept `markers` `path:line` still exists in the file.
+- The return summary says which abstractions were re-gathered and which were kept.
+
 ## Starter issues (only when your brief says `starter_issues: true`)
 
 If GitHub is available, also fill the top-level `starter_issues` list (schema in `evidence.md`): open issues that welcome newcomers.

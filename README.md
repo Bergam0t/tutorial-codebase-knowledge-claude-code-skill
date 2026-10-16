@@ -181,7 +181,7 @@ All options are `key=value` pairs after the optional target.
 | `learning` | `off` | `on` adds a self-test (or, for contributors, an exercise) to every chapter, reading paths to each overview, and a first-contribution list. See [Learning aids](#learning-aids) |
 | `briefing` | `none` | `pdf`, `docx` or `pdf,docx`: stakeholder audiences also get a short print-ready briefing. See [Stakeholder briefing](#stakeholder-briefing-pdf--word) |
 | `config` | `.codebase-tutorial.yml` in the target | Path to a project config file, or `none` to ignore it. See [Project config](#project-config-and-the-generation-record) |
-| `keep_work` | off | Keep `_work/` (the outline, style block and critic findings) for inspection |
+| `keep_work` | off | Keep `_work/` (working copies of the outline, evidence and style block, and the critic findings) for inspection. The outline, evidence and styles are also kept in the tutorial folder either way |
 | `docs` | none | Integration mode: the path to an existing Quarto project to add the tutorial to (see below) |
 | `section` | `tutorial` | Integration mode: the subfolder of `docs` to create |
 
@@ -326,7 +326,7 @@ notes: |
 
 `focus` steers the analyst; `notes` are house terminology added to every writer's style block. Notes are style guidance only: they can't change what the agents are allowed to do. If you point the skill at a cloned URL, it shows you the config it found and asks before applying it. At the end of a run without a config, the skill prints the options it used as a ready-to-paste file.
 
-**Generation record.** Every run writes `_generation.json` into the tutorial folder (Quarto ignores it), plus a copy of the outline. It records the plugin version, the commit, the resolved options, and a content hash of every source file each chapter depends on. Every page footer also says which commit the tutorial describes ("Generated from commit `813d416` on 2026-10-15"), so readers can judge how fresh it is.
+**Generation record.** Every run writes `_generation.json` into the tutorial folder (Quarto ignores it), plus copies of the analysis it was built from (`_outline.yaml`, and `_evidence.yaml`, `_plain-outline.yaml` and `_site-profile.yaml` when those steps ran) and the style blocks (`_styles/`). Keeping these means a later update, or a new audience, doesn't repeat the analysis. It records the plugin version, the commit, the resolved options, and a content hash of every source file each chapter depends on. Every page footer also says which commit the tutorial describes ("Generated from commit `813d416` on 2026-10-15"), so readers can judge how fresh it is.
 
 ### Multiple audiences
 
@@ -571,9 +571,8 @@ pip install "griffe<1.10"
 
 **The section folder already exists.** In integration mode the skill stops rather than overwriting it. Delete or rename the folder, or pass `section=<new name>`.
 
-**I want to see what the agents decided.** Re-run with `keep_work`. Then `_work/` keeps:
-- `outline.yaml` (the plan)
-- `style.md` (the resolved audience and theme)
+**I want to see what the agents decided.** The plan and evidence survive in the tutorial folder anyway: `_outline.yaml`, `_evidence.yaml`, `_plain-outline.yaml`, `_site-profile.yaml` and `_styles/`. Re-run with `keep_work` to also keep `_work/`, which holds:
+- `outline.yaml`, `evidence.yaml` and `style.md` (working copies of the above)
 - `site-profile.yaml` (in integration mode)
 - `critique/*.yaml` (every critic finding)
 
@@ -624,6 +623,7 @@ skills/
       check_drift.py             # which chapters depend on changed source files
       check_tutorial.py          # drift + snippets + links in one go (CI entry point)
 CHANGELOG.md
+RELEASING.md                     # how to cut a release
 LICENSE                          # MIT (original + this derivative)
 README.md
 ```

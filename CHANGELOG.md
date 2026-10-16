@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes.
+All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes. New entries go under **Unreleased** until a release is cut (see [RELEASING.md](RELEASING.md)).
+
+## Unreleased
+
+- The CI freshness template now pins `PLUGIN_REF` to a plugin release tag instead of `main`, for reproducible checks.
+- **Keep the voice-independent analysis.** The tutorial folder now also keeps `_evidence.yaml` and (in integration mode) `_site-profile.yaml` next to `_outline.yaml`, so a later run, such as adding an audience in a different voice, needn't repeat that work. `_generation.json` moves to `schema` 2, adding `source_base_url`; `/codebase-tutorial:update` still reads schema 1 records and upgrades them when it refreshes the record.
+- The analyst now always fills in each abstraction's `tests` (it used to only for advanced audiences), and writes `summary` and `description` in a neutral, factual register without analogies, so the stored outline suits any later audience. Analogies and tone come from each audience's style block and writers.
+- `/codebase-tutorial:update` refreshes stored evidence incrementally (new update mode for `tutorial-evidence-gatherer`) instead of regathering it all.
 
 ## 1.7.0
 

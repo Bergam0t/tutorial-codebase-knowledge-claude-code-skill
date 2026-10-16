@@ -5,24 +5,25 @@ The analyst writes this file and every later stage reads it. It replaces the Poc
 ```yaml
 project_name: my-project
 
-# 3–6 sentences explaining the project's purpose and main functionality, pitched at the
-# target audience. Markdown allowed: use **bold** and *italic* to highlight key concepts.
+# 3–6 sentences explaining the project's purpose and main functionality, in a neutral,
+# factual register (no analogies). Markdown allowed: use **bold** and *italic* to
+# highlight key concepts.
 summary: |
   **my-project** is a ...
 
 abstractions:
   - id: query_processing          # short, stable snake_case id; never shown to readers
     name: Query Processing        # display name (in the target language)
-    description: |                # ~100 words, includes one simple analogy (target language)
-      Explains what the abstraction does.
-      It's like a central dispatcher routing requests.
+    description: |                # ~100 words, neutral and factual, no analogy (target language)
+      Receives each request, decides which handler should serve it,
+      and passes the request on.
     files:                        # repo-relative paths that best show this abstraction
       - src/query/processor.py
       - src/query/router.py
     key_symbols:                  # classes/functions/config keys the chapter should focus on
       - QueryProcessor
       - route_query()
-    tests:                        # advanced audiences only: test files that exercise this abstraction
+    tests:                        # always filled: test files that exercise this abstraction (may be empty)
       - tests/test_router.py
 
 relationships:
@@ -64,6 +65,7 @@ chapter_order:                    # every abstraction exactly once, foundational
 - **Relationships** should be backed by one abstraction actually calling, configuring, or passing data to another. Keep only the important ones. Simple beats complete.
 - **introduces / builds_on / one_line_summary** exist because chapters are written in parallel and cannot read each other. Together they give each writer a map of what has been explained and where. Keep `introduces` lists disjoint across chapters where possible.
 - **Language**: `summary`, `name`, `description`, `label`, `one_line_summary`, and `introduces` are in the target language. `id`, `files`, and `key_symbols` stay as they appear in the code.
+- **Voice-neutral**: the outline is stored with the tutorial (`_outline.yaml`) and reused whenever another audience is added, so `summary` and `description` state facts and carry no analogy, tone or assumed level. Each audience's voice, including its analogies, comes from its style block and its writers.
 - Quote any YAML string containing `:` followed by a space, or a leading `#`, `*`, `&`, `!`, `[`, `{`.
 
 ## `update_notes` (update mode only)

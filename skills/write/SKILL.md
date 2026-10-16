@@ -130,10 +130,10 @@ Spawn **one** `tutorial-analyst` subagent. Brief it with:
 - `max_abstractions`, `language`, `format`
 - absolute path to `outline-schema.md`
 - the output path: `<output>/_work/outline.yaml`
-- a one-line summary of the audience (so it pitches descriptions appropriately)
+- a one-line summary of the audience, for orientation only. Tell it to write `summary` and each `description` in a **neutral, factual register** with no analogies, because the outline is kept and reused for audiences added later, and each audience's voice comes from its style block and the writers
 - the project config's `focus` text, if any, as a hint about which areas matter most or are out of scope
 - integration mode: the absolute paths to `site-profile.yaml` and `site-integration.md`
-- if any audience is advanced: ask it to fill in `tests` for each abstraction (the test files that exercise it), and to prefer key symbols that include extension points and public interfaces. It may read test files for this, even though tests are excluded from chapter topics.
+- always ask it to fill in `tests` for each abstraction (the test files that exercise it), whatever the audience: the outline is kept, and an advanced audience added later needs them. It may read test files for this, even though tests are excluded from chapter topics. If any audience is advanced, also ask it to prefer key symbols that include extension points and public interfaces.
 
 ## 5. Validate the outline
 
@@ -317,11 +317,11 @@ If `lightbox` was requested, add `lightbox: auto` under `format: html`.
 ### Generation record and "generated from" line
 
 1. **Footer**: build the `left:` footer text from the commit info of step 2, as `config.md` describes (translated, with the short sha linked to `commit_url`, and "(plus uncommitted changes)" if `dirty`). In integration mode, add it to the attribution paragraph in `index.qmd` instead.
-2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Include `learning` and `briefing` in `args`, so an update repeats them. Then run
+2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Include `source_base_url` (from step 2, "none" if there isn't one), and `learning` and `briefing` in `args`, so an update repeats them. Then run
    ```
-   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] --styles-dir <output>/_work
+   python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] [--evidence <output>/_work/evidence.yaml] [--site-profile <output>/_work/site-profile.yaml] --styles-dir <output>/_work
    ```
-   The record, the outline copies and the style blocks (`_styles/`) live in `<output>/` and survive the `_work/` cleanup. Tell the user about the warning if any listed source file was missing.
+   Pass `--evidence` if step 5b ran and `--site-profile` in integration mode. The record, the analysis copies (`_outline.yaml`, `_evidence.yaml`, `_plain-outline.yaml`, `_site-profile.yaml`) and the style blocks (`_styles/`) live in `<output>/` and survive the `_work/` cleanup, so a later update or new audience can reuse them. Tell the user about the warning if any listed source file was missing.
 
 If the critics or reviewer later change which source files a chapter cites, re-run the `write` command at the end of step 9 so the record matches the final pages.
 

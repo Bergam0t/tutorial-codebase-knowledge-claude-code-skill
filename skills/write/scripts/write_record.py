@@ -16,6 +16,7 @@ Two subcommands:
 
     write_record.py write --repo <repo> --out <tutorial dir> --info <info.json>
                           [--outline outline.yaml] [--plain-outline plain-outline.yaml]
+                          [--evidence evidence.yaml] [--site-profile site-profile.yaml]
                           [--styles-dir <_work dir>]
 
 The --info file is JSON written by the orchestrator:
@@ -29,8 +30,15 @@ The --info file is JSON written by the orchestrator:
                   "files": ["src/router.py"], "tests": ["tests/test_router.py"]}],
     "pages":    [{"audience": "stakeholder-public", "id": "what-it-does",
                   "filename": "what-it-does.qmd", "evidence": ["src/router.py:10-40"]}],
+    "source_base_url": "https://github.com/me/mypkg/blob/<sha>/",   (or "none")
     "args": {"max_abstractions": 10, "critique": "on"}
   }
+
+The analysis that does not depend on the audience's voice is copied next to the record,
+so a later run (an update, or a new audience) need not redo it: _outline.yaml,
+_evidence.yaml, _plain-outline.yaml and _site-profile.yaml (each only if its source
+file was given), plus _styles/. Schema 2 added source_base_url and the extra copies;
+readers must accept schema 1 records, which have neither.
 
 Files starting with "_" are ignored by Quarto, so the record never renders.
 Hashes are git blob hashes of the *working tree* content, so they are identical
@@ -51,7 +59,9 @@ from pathlib import Path
 RECORD_NAME = "_generation.json"
 OUTLINE_COPY = "_outline.yaml"
 PLAIN_OUTLINE_COPY = "_plain-outline.yaml"
-SCHEMA = 1
+EVIDENCE_COPY = "_evidence.yaml"
+SITE_PROFILE_COPY = "_site-profile.yaml"
+SCHEMA = 2
 LOCATION_SUFFIX = re.compile(r":\d+(?:-\d+)?$")
 
 
@@ -189,17 +199,27 @@ def cmd_write(args: argparse.Namespace) -> int:
         "language": info.get("language"),
         "theme": info.get("theme"),
         "extensions": info.get("extensions", []),
+        "source_base_url": info.get("source_base_url"),
         "audiences": info.get("audiences", []),
         "args": info.get("args", {}),
         "chapters": chapters,
         "pages": pages,
     }
 
-    # Copy the outline files next to the record: _work/ is deleted at the end of a run,
-    # and the update step needs the abstractions and relationships it was built from.
-    for src, name in ((args.outline, OUTLINE_COPY), (args.plain_outline, PLAIN_OUTLINE_COPY)):
+    # Copy the analysis files next to the record: _work/ is deleted at the end of a run,
+    # and later runs need what the tutorial was built from. The update step needs the
+    # abstractions and relationships, and the evidence it can refresh incrementally. A new
+    # audience needs all of it, so that no analysis has to be repeated.
+    for src, name in (
+        (args.outline, OUTLINE_COPY),
+        (args.plain_outline, PLAIN_OUTLINE_COPY),
+        (args.evidence, EVIDENCE_COPY),
+        (args.site_profile, SITE_PROFILE_COPY),
+    ):
         if src and Path(src).is_file():
-            shutil.copyfile(src, out / name)
+            # Skip a copy onto itself (an update may pass the stored file back in).
+            if Path(src).resolve() != (out / name).resolve():
+                shutil.copyfile(src, out / name)
 
     # Keep the resolved style blocks too, so an update writes in exactly the same voice
     # (this matters most for free-text audiences, whose block was written ad hoc).
@@ -236,6 +256,8 @@ def main() -> int:
     p_write.add_argument("--info", required=True, help="JSON file from the orchestrator")
     p_write.add_argument("--outline")
     p_write.add_argument("--plain-outline")
+    p_write.add_argument("--evidence", help="evidence.yaml to keep (advanced or stakeholder audiences)")
+    p_write.add_argument("--site-profile", help="site-profile.yaml to keep (integration mode)")
     p_write.add_argument("--styles-dir", help="folder holding style.md / style-<slug>.md (usually _work)")
     p_write.set_defaults(func=cmd_write)
 

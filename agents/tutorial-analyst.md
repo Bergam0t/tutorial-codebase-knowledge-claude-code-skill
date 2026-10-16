@@ -26,13 +26,14 @@ Identify the top **5 to max_abstractions** core abstractions that matter most fo
 For each, give:
 
 - a concise `name`
-- a `description` of about 100 words, pitched at the target audience, explaining what it is with **one simple analogy**
+- a `description` of about 100 words that says what it is and does, in a **neutral, factual register**. Use no analogy and no audience-specific tone: the outline is kept and reused for audiences added later, and the chapter writers supply the analogies in each audience's own voice.
 - the `files` (repo-relative paths) that best show it
 - the `key_symbols` a chapter should focus on
+- the `tests`: test files that exercise it (found by name, or by grepping test directories for its key symbols). Fill this in whatever the audience, using an empty list if there are none. You may read test files for this, even though tests are not chapter topics.
 
 ## 3. Analyse relationships
 
-- Write a high-level `summary` of the project's purpose and main functionality in a few sentences pitched at the target audience. Use **bold** and *italic* markdown to highlight important concepts.
+- Write a high-level `summary` of the project's purpose and main functionality in a few sentences, in the same neutral, factual register. Use **bold** and *italic* markdown to highlight important concepts.
 - List the key `relationships` between abstractions. Each has `from`, `to`, and a `label` of just a few words (e.g. "Manages", "Configures", "Passes results to"). Ideally each relationship is backed by one abstraction calling, or passing parameters to, another. Simplify, and leave out unimportant ones.
 - **Every abstraction must be involved in at least one relationship**, as either source or target. If one isn't, either find its real connection or reconsider whether it is a core abstraction.
 

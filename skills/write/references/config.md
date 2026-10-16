@@ -67,7 +67,7 @@ Never write a config file into the repo unasked. At the end of a run (step 10), 
 
 ## `_generation.json`
 
-Written by `scripts/write_record.py write` at the end of assembly (step 7), into the tutorial folder (`<output>/`; in integration mode, `<docs>/<section>/`). It is ignored by Quarto because the name starts with `_`. **It is kept when `_work/` is deleted.** Next to it, the script copies `_outline.yaml` (and `_plain-outline.yaml` for stakeholder audiences), because the update step needs the abstractions and relationships the tutorial was built from, and the style blocks into `_styles/`, so an update writes in exactly the same voice.
+Written by `scripts/write_record.py write` at the end of assembly (step 7), into the tutorial folder (`<output>/`; in integration mode, `<docs>/<section>/`). It is ignored by Quarto because the name starts with `_`. **It is kept when `_work/` is deleted.** Next to it, the script copies the analysis the tutorial was built from, so no later run has to repeat it: `_outline.yaml` (abstractions, relationships, tests), `_evidence.yaml` (advanced or stakeholder audiences), `_plain-outline.yaml` (stakeholder audiences) and `_site-profile.yaml` (integration mode). It also copies the style blocks into `_styles/`, so an update writes in exactly the same voice. Records with `schema` 1 (plugin 1.7.0 and earlier) lack `source_base_url` and the evidence and site-profile copies; the update step handles them and upgrades the record.
 
 Contents:
 
@@ -77,6 +77,7 @@ Contents:
 | `generated_at` | UTC timestamp |
 | `source` | `repo_url`, `commit`, `branch`, `commit_date`, `dirty` (uncommitted changes when generated), `dirty_files`, `commit_url` |
 | `project_name`, `mode`, `docs`, `section`, `format`, `language`, `theme`, `extensions` | The resolved options |
+| `source_base_url` | The permalink prefix used for "View source" links, or `"none"` (schema 2) |
 | `audiences` | Each audience's `slug`, `preset`, `folder` and `kind` (`chapters` or `stakeholder`) |
 | `args` | Other resolved options (`max_abstractions`, `include`, `exclude`, `critique`, `focus`, `notes`) |
 | `chapters` | For each chapter: `id`, `name`, `filename`, and the source `files` and `tests` it depends on, each with the git blob hash of its content when the chapter was written |
@@ -91,7 +92,7 @@ The blob hashes are those of the **working-tree content**, the same value `git h
    ```
    python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] --styles-dir <output>/_work
    ```
-   The `files` for each chapter come from the outline's `files`; the `tests` from its `tests` (advanced audiences); stakeholder `evidence` from `plain-outline.yaml`.
+   The `files` for each chapter come from the outline's `files`; the `tests` from its `tests` (always filled); stakeholder `evidence` from `plain-outline.yaml`.
 
 ## The "generated from" line
 

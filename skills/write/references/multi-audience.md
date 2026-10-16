@@ -54,7 +54,7 @@ Wherever this file says "the same chapter filenames in every folder", read it as
 ## Pipeline changes
 
 1. **Style blocks**: resolve one per audience into `_work/style-<slug>.md`.
-2. **Analyst**: unchanged, and runs once. Tell it the outline will be written up for all listed audiences, so the chapter split and order must suit all of them, and descriptions should be pitched at the least experienced one.
+2. **Analyst**: unchanged, and runs once. Tell it the outline will be written up for all listed audiences, so the chapter split and order must suit all of them. Descriptions stay neutral and factual (see `outline-schema.md`), so each audience's writers pitch them in their own voice.
 3. **Writers**: one per (audience × chapter). Each brief is the usual chapter brief, plus:
    - that audience's style block
    - output path `<output>/<slug>/<filename>`
