@@ -66,7 +66,7 @@ Also check extension usage against `extensions.md`:
 - the `filters:` order in `_quarto.yml` matches what it says
 - `code-line-style` line numbers fall within their block
 
-Remove or convert any extension syntax that isn't listed. Fix each snippet FAIL by correcting the excerpt from the source, or by marking it illustrative with a proper caption. Fix each link FAIL using the chapter list, the profile's `existing_pages` and `quartodoc.objects`, or the checker's "did you mean" hint. If nothing valid exists, remove the link and keep the text. Re-run until both are clean, up to 3 attempts. Your own edits must keep them clean.
+Remove or convert any extension syntax that isn't listed. Fix each snippet FAIL by correcting the excerpt from the source, or by marking it illustrative with a proper caption. Fix each link FAIL using the chapter list, the profile's `existing_pages` and `quartodoc.objects`, or the checker's "did you mean" hint. If nothing valid exists, remove the link and keep the text. Re-run until both are clean, up to 2 attempts. Your own edits must keep them clean.
 
 In integration mode, if the checker reports interlinks as unverifiable (no `objects.json`), follow the quartodoc build rule in `site-integration.md` (Verification), then re-run. If the build isn't allowed or possible, say so in the report.
 
@@ -89,7 +89,7 @@ Otherwise, if `quarto` is on PATH (`quarto --version`), render:
 - **standalone**: `quarto render <output dir>`
 - **integration**: `quarto render <output dir>`, i.e. the section folder only, which uses the site's config and doesn't execute other pages. Never render the whole site.
 
-Treat **warnings as errors**, especially `Unable to resolve crossref`. If it fails or warns, read the message, fix the offending file, and retry, up to 3 attempts. In integration mode, if the error comes from outside the section (site config, extensions, other pages), don't fix it; report it. If Quarto is not installed, skip this step and say so.
+Treat **warnings as errors**, especially `Unable to resolve crossref`. If it fails or warns, read the message, fix the offending file, and retry, up to 2 attempts. In integration mode, if the error comes from outside the section (site config, extensions, other pages), don't fix it; report it. If Quarto is not installed, skip this step and say so.
 
 Do not leave render output behind if it was not there before. If `_book/` or `_site/` (in integration mode, `<docs>/_site` or `<docs>/_book`) did not exist before you rendered, delete it afterwards.
 

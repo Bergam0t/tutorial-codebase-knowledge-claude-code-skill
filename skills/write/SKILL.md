@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=8] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=8] [include=<globs>] [exclude=<globs>] [budget=low|standard|high] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -57,6 +57,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `output` | `output/<project_name>` | Relative to the current working directory |
 | `max_abstractions` | `8` | Upper bound; aim for 5–max |
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Default exclude: tests, docs, build/dist, vendored deps, `.venv`, `node_modules`, lockfiles, binary/media files |
+| `budget` | `standard` | Cost level. `standard` uses the models set in each agent's frontmatter (Sonnet for writers, reviewer and critics). `high` passes `model: opus` when spawning chapter writers, plain writers, the reviewer and the accuracy critic. `low` sets `max_abstractions` to 6 (unless given), `critique=off` (unless given) and critic sampling as in step 8 |
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
 | `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |
 | `learning` | `off` | `on` adds a self-test or exercise to every chapter, reading paths to each overview, and (for `advanced-contributor`) a first-contribution list. See `learning.md` |
@@ -339,7 +340,7 @@ If the critics or reviewer later change which source files a chapter cites, re-r
 
 For **stakeholder audiences**, run only the clarity and accuracy critics, plus the no-code check (`check_snippets.py --no-code --out <folder>`), whose output goes into the clarity critic's brief. Give both critics `references/stakeholder.md` and `plain-outline.yaml`, and give the accuracy critic `evidence.yaml` and the target repo too. Skip the code critic, because there's no code to check.
 
-Skip this step if `critique=off`. In multi-audience mode, run this step once per audience, over that audience's folder and with that audience's style block, writing to `_work/critique/<slug>/`. Batch those calls as `multi-audience.md` describes. Create `<output>/_work/critique/`, then spawn **all three critics in a single message**. Each one only writes its own findings file and never edits the tutorial, so they can safely run concurrently.
+Skip this step if `critique=off`. In multi-audience mode, run this step once per audience, over that audience's folder and with that audience's style block, writing to `_work/critique/<slug>/`. Batch those calls as `multi-audience.md` describes. Create `<output>/_work/critique/`. **First run the snippet checker yourself** (`python <check_snippets.py> --repo <target> --out <output>`) and keep its summary line. If it reports no FAIL and **0 illustrative** blocks, skip the code critic: the script has already proved every snippet verbatim. If it reports illustrative blocks, brief the code critic to judge only those (`only: illustrative blocks`), and give it the checker output. Then spawn the remaining critics **in a single message**. Each one only writes its own findings file and never edits the tutorial, so they can safely run concurrently.
 
 | Subagent | Findings file | Brief also includes |
 |---|---|---|
@@ -351,7 +352,9 @@ For advanced audiences:
 - also give the accuracy critic `evidence.yaml`, so it can check that every cited commit, doc, issue and marker exists and says what the chapter claims
 - tell the code critic that the style is **verbatim-first**
 
-Give every critic the absolute paths to `critique-format.md`, to `<output>/_work/extensions.md`, and to its findings file. In integration mode, also give the clarity and accuracy critics `site-profile.yaml`. The clarity critic may read the existing site pages (a real reader sees them), but still not the source code. When all three return, check that each findings file exists and parses. Re-spawn any critic whose file is missing.
+**Sampling** (`budget=low`, or more than 3 audiences): critique the first audience in full. For every other audience, brief the clarity and accuracy critics with `only:` a sample of about 3 chapters, chosen as the most-connected abstractions in `relationships`. Skip the code critic for them (the reviewer's checker run still applies).
+
+Give every critic the absolute paths to `critique-format.md`, to `<output>/_work/extensions.md`, and to its findings file. In integration mode, also give the clarity and accuracy critics `site-profile.yaml`. The clarity critic may read the existing site pages (a real reader sees them), but still not the source code. When they return, check that each findings file exists and parses. Re-spawn any critic whose file is missing.
 
 ## 9. Apply fixes, review & render
 
@@ -364,7 +367,7 @@ Otherwise, spawn **one `tutorial-reviewer`** with: the absolute output dir and t
 
 For a **stakeholder audience**, also give the reviewer `references/stakeholder.md` and `plain-outline.yaml`, and say `mode: stakeholder`. It then runs `check_snippets.py --no-code` instead of the normal snippet check.
 
-If the reviewer reports unresolved **must-fix** findings, resume it once with that list. Anything still open after that goes in your final report to the user. Do not loop further.
+Before spawning the reviewer, run `python <scripts>/check_tutorial.py` if you can: it is free, and its output goes into the reviewer's brief so it does not rediscover the same failures. If the reviewer reports unresolved **must-fix** findings, resume it once with that list. Anything still open after that goes in your final report to the user. Do not loop further.
 
 ## 10. Finish
 

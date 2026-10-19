@@ -175,6 +175,7 @@ All options are `key=value` pairs after the optional target.
 | `theme` | none | Optional flavour overlay. Ships with `1980s` |
 | `language` | `English` | Language of all generated prose. Code and identifiers stay as-is |
 | `output` | `output/<project>` | Where to write the standalone project |
+| `budget` | `standard` | `low`, `standard` or `high`. Trades cost for depth: `high` runs writers, reviewer and accuracy critic on Opus; `low` uses 6 chapters, no critique |
 | `max_abstractions` | `8` | Upper bound on chapters (it aims for 5 to this number) |
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Tests, docs, build output, vendored deps, lockfiles and binaries are excluded by default |
 | `critique` | `on` | `off` skips the three critic agents (faster and cheaper; the mechanical checks still run) |

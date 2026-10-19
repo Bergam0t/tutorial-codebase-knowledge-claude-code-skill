@@ -5,6 +5,8 @@ All notable changes to this plugin are listed here. Each release bumps `version`
 ## Unreleased
 
 - **Lower default cost.** Chapter writers, stakeholder page writers, the reviewer and the accuracy critic now run on Sonnet (medium effort) instead of Opus (the accuracy critic also drops from high to medium effort). The analyst and plain planner stay on Opus. The default `max_abstractions` drops from 10 to 8. Edit the `model:` line in `agents/*.md` to restore Opus for any role.
+- **`budget=low|standard|high`** argument. `high` spawns writers, reviewer and accuracy critic on Opus; `low` uses 6 abstractions, no critique and sampled critique for extra audiences.
+- The orchestrator now runs `check_snippets.py` before the critics and skips the code critic when every snippet is verbatim (and limits it to illustrative blocks otherwise). With more than 3 audiences, extra audiences get a sampled critique. The reviewer's retry loops drop from 3 attempts to 2, and it is given the `check_tutorial.py` output up front.
 
 - The CI freshness template now pins `PLUGIN_REF` to a plugin release tag instead of `main`, for reproducible checks.
 - **Keep the voice-independent analysis.** The tutorial folder now also keeps `_evidence.yaml` and (in integration mode) `_site-profile.yaml` next to `_outline.yaml`, so a later run, such as adding an audience in a different voice, needn't repeat that work. `_generation.json` moves to `schema` 2, adding `source_base_url`; `/codebase-tutorial:update` still reads schema 1 records and upgrades them when it refreshes the record.
