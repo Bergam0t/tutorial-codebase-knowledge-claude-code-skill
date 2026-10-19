@@ -28,6 +28,45 @@ The skill can install and use Quarto extensions. This file is the **vetted list*
 - `value-box` must come **before** `highlight-text`. `highlight-text` treats any `color=` attribute as text colour, so if it runs first, it takes the value boxes' `color` and the boxes silently lose their colours (with render warnings).
 - `include-code-files` comes first, so that included code exists before anything else styles it.
 
+### The extensions together: one worked example (tested)
+
+`include-code-files`, `code-line-style` and `code-window` all work on the **same fenced block**, so one fence carries everything. Rendered together with all three enabled, each block kept its attributes (`filename`, `code-line-style`, and for the included block its `start-line`) and was framed with its caption as the window title. Whether a line is *highlighted* happens in the browser, so check it with `quarto preview` if in doubt.
+
+A **verbatim excerpt that is pasted** (the default without `include-code-files`), highlighting the one line the next sentence explains:
+
+````markdown
+```{.python filename="src/pkg/router.py:7-11" code-line-style="hi:2"}
+    def dispatch(self, key):
+        handler = self.routes.get(key)
+        if handler is None:
+            raise KeyError(key)
+        return handler()
+```
+````
+
+The **same excerpt included from the source** (only if `include-code-files` is enabled; the body stays empty), keeping every line visible but dimming the setup so the guard stands out:
+
+````markdown
+```{.python include="../../src/pkg/router.py" start-line=7 end-line=11 filename="src/pkg/router.py:7-11" code-line-style="dim:1-2"}
+```
+````
+
+An **illustrative** block takes the same attributes, plus the `.illustrative` class and a caption that says what it is:
+
+````markdown
+```{.python .illustrative filename="Simplified from src/pkg/router.py" code-line-style="hi:2"}
+def dispatch(key):
+    handler = routes[key]   # the lookup
+    return handler()
+```
+````
+
+What to remember:
+- **One fence, three jobs.** The `filename=` caption is the `code-window` title and what the snippet checker compares. `code-line-style=` is the only extra attribute needed, and `code-window` needs nothing from you.
+- **`code-line-style` numbers are positions inside the block, not file line numbers.** Line 1 is the first line *shown*. For an `include=` block that starts at `start-line=7`, the first included line is still `1`. (Confirmed in the extension's script, which indexes the block's lines by position.) The numbers must lie within the block.
+- **Highlight the lines the next sentence explains**, and nothing else. See the line-highlighting rule in your style block for how much and which styles.
+- If you shorten a verbatim block, it becomes illustrative: renumber the highlights for the lines as shown.
+
 ### `include-code-files`: verbatim excerpts pulled from the source (tested)
 
 **Eligibility.** Enable this only if the target is a **local** repository **and** the tutorial is written **inside** it, i.e. `<output>` (or `<docs>`) is under the target. Includes are paths relative to the chapter file, so they break if the tutorial moves out of the repo, or if the repo was a temporary clone. If the extension is requested but not eligible, skip it and say why.
@@ -137,7 +176,7 @@ An `owner/repo[@tag]` that isn't in the vetted list:
    ```
    Re-running is harmless. Afterwards, check that `_extensions/**/_extension.yml` exists for it. The commit-archive install for `include-code-files` lands in `_extensions/include-code-files/`. If an install fails (offline, unknown tag), skip that extension and note it. **Never** give writers the syntax of an extension that isn't installed, because unknown shortcodes and attributes break the render or silently do nothing.
 3. **Enable**: add the filters (in order), any `extensions:` options, and `lightbox` to `_quarto.yml`, as in the table.
-4. Write **`<output>/_work/extensions.md`**, containing only the usage notes for the extensions that are actually enabled in this run (copied from this file, plus derived notes for unvetted ones), and a line listing anything skipped. Writers, critics and the reviewer receive this file. They must use **only** what it lists.
+4. Write **`<output>/_work/extensions.md`**, containing only the usage notes for the extensions that are actually enabled in this run (copied from this file, plus derived notes for unvetted ones), and a line listing anything skipped. Include "The extensions together: one worked example" when `code-line-style` or `code-window` is enabled, leaving out the `include=` example unless `include-code-files` is enabled, and the highlighting examples unless `code-line-style` is enabled. Writers, critics and the reviewer receive this file. They must use **only** what it lists.
 5. Record each installed source and version (from `_extension.yml`) for the final report.
 
 ## Integration mode

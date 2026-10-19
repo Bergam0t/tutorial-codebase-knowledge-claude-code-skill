@@ -64,7 +64,8 @@ Both must exit 0. If `include-code-files` is enabled (see `extensions.md`), run 
 Also check extension usage against `extensions.md`:
 - no syntax from an extension that isn't listed: shortcodes, attributes such as `code-line-style=`, or classes such as `.value-box`
 - the `filters:` order in `_quarto.yml` matches what it says
-- `code-line-style` line numbers fall within their block
+- `code-line-style` line numbers fall within their block, and count positions in the block as shown (line 1 is the first line displayed, even for an `include=` block that starts at `start-line=7`), not file line numbers
+- `code-line-style` use follows the line-highlighting rule in the style block: the permitted styles, and highlights on the lines the nearby prose actually explains, not decoration. Fix a rule breach by trimming or removing the highlight.
 
 Remove or convert any extension syntax that isn't listed. Fix each snippet FAIL by correcting the excerpt from the source, or by marking it illustrative with a proper caption. Fix each link FAIL using the chapter list, the profile's `existing_pages` and `quartodoc.objects`, or the checker's "did you mean" hint. If nothing valid exists, remove the link and keep the text. Re-run until both are clean, up to 2 attempts. Your own edits must keep them clean.
 

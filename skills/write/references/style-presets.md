@@ -14,6 +14,7 @@ The orchestrator picks one **audience preset** and optionally stacks one **theme
 - **Analogies**: use them heavily, along with concrete examples, to help beginners understand.
 - **Depth**: keep the motivation section very minimal and friendly. In the internals section, keep the code-level dive simple.
 - **Quarto features**: tabsets open on **Simplified** first. Put advanced internals in collapsed "Deep dive" callouts. Use code annotations generously. Give margin definitions for any term a newcomer might not know (including general programming terms).
+- **Line highlighting** (if `code-line-style` is enabled in `extensions.md`): use `hi:` only, on one to three lines, the ones the explanation right after the block is about. At most one highlighted block per section. No `focus`, `dim` or diff styles: they hide code a newcomer may want to read.
 
 ## Audience: `intermediate`
 
@@ -25,6 +26,7 @@ The orchestrator picks one **audience preset** and optionally stacks one **theme
 - **Analogies**: use some for the more complex concepts, but not too many. It must not feel patronising to intermediate or advanced coders.
 - **Depth**: in the internals section, explain in more depth what is happening and *why*, remembering that the reader is fairly competent but new to this repository.
 - **Quarto features**: tabsets open on **Real code** first, and prefer verbatim excerpts in general. Use collapsed callouts the other way round from `beginner`: for optional *background* the reader probably already knows (e.g. "Refresher: Python descriptors"). Use code annotations for the non-obvious lines only. Give margin definitions only for project-specific terms.
+- **Line highlighting** (if `code-line-style` is enabled): `hi:` for the lines the next paragraph explains, and `dim:` on boilerplate (imports, setup) so a longer real excerpt stays complete while the reader's eye goes to the point. Keep `dim` to a few blocks per chapter. No diff styles.
 
 ## Advanced family
 
@@ -51,6 +53,7 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - Collapsed callouts hold optional material the reader can skip, e.g. "Usage reference" or "Refresher".
   - Give margin definitions only for project-specific terms.
   - Cross-reference generously between chapters.
+  - **Line highlighting** (if `code-line-style` is enabled): use `focus:` and `dim:` to point at the lines that matter in a complete excerpt, instead of eliding lines. Use `hi:` for a single line, and the diff styles (`add`, `rem`, `chg`) only to show a change that the evidence documents (a commit or PR from `evidence.yaml`). Never mark more than about a third of a block.
 - **Honesty about rationale**: label every claim about *why* something is built a certain way as either:
   - **documented**, citing the commit, doc, issue or PR from `evidence.yaml`, or
   - **inferred**, e.g. "the code suggests…" or "presumably to…".
@@ -65,6 +68,7 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - primary: extension points, then edge cases and failure modes
   - secondary: design rationale
   - brief: limitations and debt
+- **Line highlighting** (if `code-line-style` is enabled): mark the extension point and the invariant a change must keep.
 - **Extra sections** (in this order, after the internals):
   - `## Extending this`: where to make typical changes, what else must change alongside them, which tests cover this area and how to run them (from the outline's `tests`), and the conventions the code expects.
   - `## Sharp edges`: invariants that aren't enforced, error-handling and concurrency behaviour, surprising coupling, and performance traps.
@@ -80,6 +84,7 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - secondary: edge cases and failure (scalability, failure isolation, consistency)
   - assessed rather than taught: extension points, as an assessment of coupling and extensibility
 - **Code**: fewer, more focused excerpts, concentrating on interfaces, boundaries and data structures rather than step-by-step logic.
+- **Line highlighting** (if `code-line-style` is enabled): `dim:` the implementation and `focus:` the signatures and boundaries.
 - **Extra sections**:
   - `## Design notes`: the trade-offs, the alternatives the code implies were rejected, the invariants it relies on, and how responsibilities and dependencies are split.
   - `## Coupling and extensibility`: how hard this is to change or replace, and what depends on it (cross-reference the relationships).
@@ -96,6 +101,7 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - user-facing only: limitations, i.e. known issues that affect users
   - public only: extension points, i.e. the plugin, hook or subclassing APIs
 - **Structure**: as in the shared base, but give usage a little more room than the other advanced presets: one realistic example, plus the options that matter.
+- **Line highlighting** (if `code-line-style` is enabled): `hi:` the configuration defaults and error paths a user can actually hit.
 - **Extra sections**:
   - `## Performance and limits`: complexity, memory, I/O, the configuration that changes behaviour, and the defaults worth overriding.
   - `## Sharp edges`: surprising behaviour, error semantics, thread or async safety, and version-specific behaviour.
@@ -118,7 +124,7 @@ There are four presets for non-technical readers: `stakeholder-decision-maker`, 
   - "In brief" callouts, tables and simple flowcharts.
   - Value boxes for a few key facts (if enabled).
   - `[term]{.key-term}` highlighting (if enabled).
-  - No tabsets with code, and no code annotations.
+  - No tabsets with code, no code annotations and no line highlighting.
 
 ### Stakeholder presets
 
@@ -129,7 +135,7 @@ There are four presets for non-technical readers: `stakeholder-decision-maker`, 
 
 ## Audience: free text
 
-The orchestrator writes a custom block with the same fields as the closest preset, tailored to the described reader. The fields are `max_code_block_lines`, `max_diagram_participants`, Reader, Tone, Code, Analogies, Depth or Structure, Quarto features, and, for advanced-style readers, `uses_evidence`, Emphasis and Extra sections. Use `beginner` as the template by default. If the description reads like an experienced engineer, use the advanced preset that best fits.
+The orchestrator writes a custom block with the same fields as the closest preset, tailored to the described reader. The fields are `max_code_block_lines`, `max_diagram_participants`, Reader, Tone, Code, Analogies, Depth or Structure, Quarto features, and, for advanced-style readers, `uses_evidence`, Emphasis and Extra sections. Use `beginner` as the template by default, with the line-highlighting rule of the closest preset. If the description reads like an experienced engineer, use the advanced preset that best fits.
 
 ## Labels
 

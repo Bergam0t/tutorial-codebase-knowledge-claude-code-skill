@@ -300,6 +300,7 @@ The skill installs Quarto extensions into the tutorial project with `quarto add`
 ```
 
 - **Other extensions:** pass `owner/repo@tag`. The skill asks before installing anything outside the vetted list, because extension filters run code on every render. It then works out the usage notes from the extension's own files.
+- **How writers know the syntax:** they receive notes for exactly the extensions enabled in that run, including one worked example of a code block using them together, and each audience's style says how much line highlighting suits it. The reviewer checks both.
 - **Filter order:** the skill orders filters correctly. For example, `value-box` must run before `highlight-text`, or the value boxes silently lose their colours.
 - **If an install fails:** the skill skips that extension, so writers never use syntax for something that isn't installed.
 - **Integration mode:** the defaults are *not* installed automatically. See the next section.
