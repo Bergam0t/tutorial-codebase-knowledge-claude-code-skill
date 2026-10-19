@@ -2,7 +2,7 @@
 
 All notable changes to this plugin are listed here. Each release bumps `version` in `.claude-plugin/plugin.json`. Users who installed from the marketplace only receive changes when the version changes. New entries go under **Unreleased** until a release is cut (see [RELEASING.md](RELEASING.md)).
 
-## Unreleased
+## 2.0.0
 
 - **Lower default cost.** Chapter writers, stakeholder page writers, the reviewer and the accuracy critic now run on Sonnet (medium effort) instead of Opus (the accuracy critic also drops from high to medium effort). The analyst and plain planner stay on Opus. The default `max_abstractions` drops from 10 to 8. Edit the `model:` line in `agents/*.md` to restore Opus for any role.
 - **`budget=low|standard|high`** argument. `high` spawns writers, reviewer and accuracy critic on Opus; `low` uses 6 abstractions, no critique and sampled critique for extra audiences.

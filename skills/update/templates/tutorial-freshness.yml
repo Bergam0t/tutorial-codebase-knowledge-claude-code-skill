@@ -21,7 +21,7 @@ on:
 env:
   TUTORIAL_DIR: docs/tutorial  # the folder that contains _generation.json
   PLUGIN_REPO: https://github.com/Bergam0t/tutorial-codebase-knowledge-claude-code-skill
-  PLUGIN_REF: v1.7.0           # a release tag of the plugin; update it when you upgrade the plugin
+  PLUGIN_REF: v2.0.0           # a release tag of the plugin; update it when you upgrade the plugin
   STRICT: "false"              # "true" = fail when any chapter is stale
 
 jobs:
