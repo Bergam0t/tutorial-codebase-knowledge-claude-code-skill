@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=10] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=8] [include=<globs>] [exclude=<globs>] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -55,7 +55,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `theme` | none | Optional overlay, e.g. `1980s` |
 | `language` | `English` | Language of all generated prose |
 | `output` | `output/<project_name>` | Relative to the current working directory |
-| `max_abstractions` | `10` | Upper bound; aim for 5–max |
+| `max_abstractions` | `8` | Upper bound; aim for 5–max |
 | `include` / `exclude` | sensible defaults | Comma-separated globs. Default exclude: tests, docs, build/dist, vendored deps, `.venv`, `node_modules`, lockfiles, binary/media files |
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
 | `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |

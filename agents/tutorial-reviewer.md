@@ -2,7 +2,7 @@
 name: tutorial-reviewer
 description: Final pass of the codebase-tutorial skill. Applies the critics' findings, checks cross-chapter consistency, links, style limits, snippet fidelity and Quarto validity, fixes issues in place, and attempts quarto render.
 tools: Read, Glob, Grep, Edit, Bash
-model: opus
+model: sonnet
 effort: medium
 ---
 

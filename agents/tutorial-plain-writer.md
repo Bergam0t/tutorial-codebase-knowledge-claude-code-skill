@@ -2,7 +2,7 @@
 name: tutorial-plain-writer
 description: Writes one plain-language, zero-code page (.qmd) of a codebase tutorial for a non-technical stakeholder audience (decision-makers, domain experts, product owners or the public). Several run in parallel.
 tools: Read, Glob, Grep, Write, Bash
-model: opus
+model: sonnet
 effort: medium
 ---
 

@@ -4,6 +4,8 @@ All notable changes to this plugin are listed here. Each release bumps `version`
 
 ## Unreleased
 
+- **Lower default cost.** Chapter writers, stakeholder page writers, the reviewer and the accuracy critic now run on Sonnet (medium effort) instead of Opus (the accuracy critic also drops from high to medium effort). The analyst and plain planner stay on Opus. The default `max_abstractions` drops from 10 to 8. Edit the `model:` line in `agents/*.md` to restore Opus for any role.
+
 - The CI freshness template now pins `PLUGIN_REF` to a plugin release tag instead of `main`, for reproducible checks.
 - **Keep the voice-independent analysis.** The tutorial folder now also keeps `_evidence.yaml` and (in integration mode) `_site-profile.yaml` next to `_outline.yaml`, so a later run, such as adding an audience in a different voice, needn't repeat that work. `_generation.json` moves to `schema` 2, adding `source_base_url`; `/codebase-tutorial:update` still reads schema 1 records and upgrades them when it refreshes the record.
 - The analyst now always fills in each abstraction's `tests` (it used to only for advanced audiences), and writes `summary` and `description` in a neutral, factual register without analogies, so the stored outline suits any later audience. Analogies and tone come from each audience's style block and writers.

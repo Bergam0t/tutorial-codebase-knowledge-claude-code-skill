@@ -2,7 +2,7 @@
 name: tutorial-chapter-writer
 description: Writes a single tutorial chapter (.qmd) about one codebase abstraction for the codebase-tutorial skill. Several run in parallel, one per chapter.
 tools: Read, Glob, Grep, Write, Bash
-model: opus
+model: sonnet
 effort: medium
 ---
 

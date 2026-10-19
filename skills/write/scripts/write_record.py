@@ -31,7 +31,7 @@ The --info file is JSON written by the orchestrator:
     "pages":    [{"audience": "stakeholder-public", "id": "what-it-does",
                   "filename": "what-it-does.qmd", "evidence": ["src/router.py:10-40"]}],
     "source_base_url": "https://github.com/me/mypkg/blob/<sha>/",   (or "none")
-    "args": {"max_abstractions": 10, "critique": "on"}
+    "args": {"max_abstractions": 8, "critique": "on"}
   }
 
 The analysis that does not depend on the audience's voice is copied next to the record,
