@@ -159,7 +159,7 @@ These pair an illustrative snippet with the verbatim original:
 
 - Always use `group="code-view"` with the tab names exactly `Simplified` and `Real code`. Tabsets that share a group stay in sync, so readers who prefer the real code only have to choose once.
 - The tab order sets the default: the first tab opens first. The style block says which tab goes first.
-- The "Real code" tab may exceed `max_code_block_lines` up to **3×** the limit, because it is opt-in. The "Simplified" tab must respect the limit.
+- The "Real code" tab may exceed `max_code_block_lines` up to **3×** the limit, because it is opt-in. The "Simplified" tab aims for the limit (the reviewer allows 20% over, as in `style-presets.md`).
 - The tab headings must be one level below the section they are in.
 
 ## 6. Glossary and margin definitions

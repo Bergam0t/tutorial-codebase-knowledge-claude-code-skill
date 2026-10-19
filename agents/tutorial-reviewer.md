@@ -38,7 +38,7 @@ In integration mode, your brief also includes `site-profile.yaml`, `site-integra
 ## 3. Content checks
 
 - **Links**: every relative `.qmd` link points to a file that exists, and the link text matches that chapter's name. The previous/next transitions point to the actual neighbouring chapters. Re-check this after applying fixes.
-- **Limits**: no code block exceeds `max_code_block_lines` (a "Real code" tab may go up to 3× that), and no sequence diagram exceeds `max_diagram_participants`. To shrink an oversized verbatim excerpt, split it into two verbatim excerpts with a sentence between them. Don't elide lines, because that would make it illustrative.
+- **Limits**: `max_code_block_lines` is the writers' target, and you allow **20% over it, rounded down** (20 allows 24, 100 allows 120, 150 allows 180). Flag and fix a block only when it exceeds that flexed limit; a block between the target and the flexed limit stays as it is, and is not a finding. A "Real code" tab may go up to 3× the target. A limit of 0 has no flex. For an `include=` block the length is `end-line` − `start-line` + 1. No sequence diagram may exceed `max_diagram_participants`, which has no flex. To shrink an oversized verbatim excerpt, split it into two verbatim excerpts with a sentence between them. Don't elide lines, because that would make it illustrative.
 - **Consistency**: each abstraction is named the same way everywhere. Where a chapter re-explains a concept that another chapter `introduces`, replace the duplicate with a brief reminder and a link.
 - **Language & tone**: the whole project is in the target language and matches the style block (including the theme overlay, if any).
 

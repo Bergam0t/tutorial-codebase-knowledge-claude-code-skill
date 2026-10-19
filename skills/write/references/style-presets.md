@@ -1,6 +1,6 @@
 # Style presets
 
-The orchestrator picks one **audience preset** and optionally stacks one **theme overlay** on top, then hands the combined block to every writer and to the reviewer. Numeric limits are hard limits and the reviewer enforces them.
+The orchestrator picks one **audience preset** and optionally stacks one **theme overlay** on top, then hands the combined block to every writer and to the reviewer. Numeric limits work in two ways. **`max_code_block_lines` is a target for the writers, and the reviewer allows 20% over it** (rounded down: 20 becomes 24, 100 becomes 120, 150 becomes 180), because splitting or trimming a block that is only slightly over often makes it worse. Writers should still aim for the stated number. A limit of 0 (stakeholder presets) has no flex. **`max_diagram_participants` is a hard limit.**
 
 ---
 

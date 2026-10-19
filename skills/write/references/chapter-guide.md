@@ -2,7 +2,7 @@
 
 You are writing **one** chapter of a multi-chapter tutorial about a codebase. Other writers are producing the other chapters at the same time, and you cannot see their text. The chapter list, `builds_on`, and `introduces` tell you what the rest of the tutorial covers, so you can link to it instead of repeating it.
 
-Apply the **style block** you were given throughout. Its numeric limits (`max_code_block_lines`, `max_diagram_participants`) are hard limits.
+Apply the **style block** you were given throughout. Its numeric limits are what you aim for. `max_diagram_participants` is a hard limit. `max_code_block_lines` is a target: write blocks at or under it. The reviewer lets a block run up to 20% over (rounded down) rather than split it, but don't plan on using that.
 
 Also follow `quarto-conventions.md`: it covers front matter, code fences, mermaid syntax, and links.
 
@@ -25,7 +25,7 @@ The structure below is the default. If your style block has a **Structure** fiel
 
 5. **Using it**: show how to use the abstraction to solve the use case. Give example inputs and outputs for snippets. If the output isn't a value, describe at a high level what happens.
 
-6. **Code blocks**: each block stays at or under `max_code_block_lines`. If more is needed, split it into pieces and walk through them in turn: consecutive verbatim excerpts with their own line ranges work well for this. Using comments to skip unimportant details makes a block illustrative, so mark it so. Follow every code block immediately with an explanation pitched at the audience.
+6. **Code blocks**: aim for each block to stay at or under `max_code_block_lines`. If a block would run more than a few lines over, split it into pieces and walk through them in turn: consecutive verbatim excerpts with their own line ranges work well for this. Using comments to skip unimportant details makes a block illustrative, so mark it so. Follow every code block immediately with an explanation pitched at the audience.
 
 7. **Under the hood (walkthrough)**: first a non-code or code-light, step-by-step walkthrough of what happens when the abstraction is used. Include a simple `sequenceDiagram` with a dummy example, using at most `max_diagram_participants` participants. Alias participants that have spaces (`participant QP as Query Processing`).
 

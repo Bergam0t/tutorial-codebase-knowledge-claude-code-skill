@@ -246,7 +246,7 @@ You can also describe any reader in your own words (`audience="data scientists, 
 | | `beginner` | `intermediate` |
 |---|---|---|
 | Reader | New to programming concepts as well as to this codebase | Knows the language, new to this codebase |
-| Code block limit | 20 lines, aggressively simplified | 100 lines, more real code |
+| Code block target | 20 lines (up to 24 accepted), aggressively simplified | 100 lines (up to 120 accepted), more real code |
 | Diagrams | ≤ 5 participants | ≤ 10 participants |
 | Analogies | Plenty | Sparing; never patronising |
 | Tabs open on | Simplified | Real code |
@@ -256,7 +256,7 @@ You can also describe any reader in your own words (`audience="data scientists, 
 ### Advanced presets
 
 These three presets are for experienced engineers. They share:
-- **verbatim-first code**: real excerpts up to 150 lines; illustrative blocks only for pseudocode or usage examples
+- **verbatim-first code**: real excerpts aiming for 150 lines or fewer (up to 180 accepted); illustrative blocks only for pseudocode or usage examples
 - **a compressed structure**: one-paragraph motivation, brief usage, most of the chapter on internals
 - **a conversational expert voice**: peer to peer, occasional analogies, British English
 

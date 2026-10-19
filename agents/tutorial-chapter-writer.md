@@ -37,6 +37,6 @@ Hard rules (the reviewer will check them):
   - API links use the profile's `link_style` and only names from `api_refs` or `quartodoc.objects`. Link each symbol's first mention, and don't re-document parameters.
   - Links to existing pages use relative paths from your file.
   - Never edit any file outside your own chapter.
-- Every code block is either verbatim (```` ```{.python filename="path:start-end"} ````, copied exactly) or illustrative (```` ```{.python .illustrative filename="Simplified from path"} ````). Never use executable ```` ```{python} ```` or an uncaptioned ```` ```python ````. Each block is within `max_code_block_lines`.
+- Every code block is either verbatim (```` ```{.python filename="path:start-end"} ````, copied exactly) or illustrative (```` ```{.python .illustrative filename="Simplified from path"} ````). Never use executable ```` ```{python} ```` or an uncaptioned ```` ```python ````. Aim for each block to be at or under `max_code_block_lines`; the reviewer allows up to 20% over, but treat the stated number as your target.
 - Diagrams use ```` ```{mermaid} ````. Sequence diagrams have at most `max_diagram_participants` participants.
 - Every code excerpt is grounded in a real file, and illustrative code uses real names and signatures.
