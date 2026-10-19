@@ -17,6 +17,7 @@ The work is delegated to Claude Code subagents that explore the code themselves,
 
 - [What you get](#what-you-get)
 - [Requirements](#requirements)
+- [GitHub access](#github-access)
 - [Installation](#installation)
 - [Quick start](#quick-start)
 - [Options](#options)
@@ -75,7 +76,53 @@ Every code block is either a **verbatim** excerpt from the repo or clearly marke
 | `git` | Yes | Cloning URLs, source permalinks, change checks |
 | [Quarto](https://quarto.org) 1.4+ | Recommended | Needed to render and validate the output. Without it, the render step is skipped |
 | [quartodoc](https://machow.github.io/quartodoc/) | Optional | Only for integration with a quartodoc site, and only if the API reference isn't already built |
-| [GitHub CLI](https://cli.github.com) (`gh`), signed in | Optional | Lets the advanced audiences cite open issues and PRs. Without it, advanced pages tell readers to check the issue tracker themselves |
+| [GitHub CLI](https://cli.github.com) (`gh`), signed in | Optional | Lets the advanced audiences cite open issues and PRs. Without it, advanced pages tell readers to check the issue tracker themselves. See [GitHub access](#github-access) |
+
+---
+
+## GitHub access
+
+Most runs never touch GitHub. Three things can. Only the first is essential, and only when you give a URL instead of a local path:
+
+| What | Needs | Without it |
+|---|---|---|
+| Cloning a repository by URL (`/codebase-tutorial:write https://github.com/owner/repo`) | `git` that can already clone that repository | The run stops, since there is nothing to read. A local path never needs this |
+| Citing open **issues and pull requests** (advanced and stakeholder audiences, and the "first contribution" list with `learning=on`) | The [GitHub CLI](https://cli.github.com) `gh`, signed in, with read access to the repository | The run carries on. Advanced pages say GitHub wasn't checked and tell readers to look at the issue tracker themselves |
+| **"View source" links** to exact lines | The commit you documented must be pushed to a GitHub or GitLab remote | The links are left out. Commit and push first if you want them |
+
+### Set it up
+
+1. Install `gh` ([cli.github.com](https://cli.github.com)) and sign in once with `gh auth login`.
+2. Check it from the same terminal you start Claude Code in: `gh auth status` should say you're logged in, and `gh issue list --repo owner/repo --limit 1` should answer without an error.
+3. **Private repositories:** sign in with an account that can read the repository's issues and pull requests (`gh auth login` asks for the `repo` scope by default). To clone a private repository by URL, run `gh auth setup-git` so `git` uses the same sign-in, or use an SSH URL if you have a key set up.
+4. **Headless or CI runs:** there is no one to sign in, so set a token in the environment instead: `GH_TOKEN=<token>`, with read access to the repository's contents, issues and pull requests. `gh` uses it automatically.
+
+Only `github.com` repositories are searched. GitHub Enterprise Server and other hosts are treated as "GitHub unavailable", and the rest of the run is unaffected.
+
+### Permissions in Claude Code
+
+`gh` and `git` run through Bash, so in the default permission mode Claude Code asks before the first call of each kind. The skill only reads: it runs `gh auth status`, `gh issue list`, `gh pr list` and `gh issue view`, and never anything that writes to GitHub or the repository. To approve them once, choose "don't ask again" when prompted, or add allow rules to your settings:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth status:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh issue view:*)"
+    ]
+  }
+}
+```
+
+A headless run can't answer a prompt, so without rules like these (or a more permissive mode) the GitHub calls are declined and the run behaves as if GitHub were unavailable.
+
+### What it keeps
+
+Issue and PR **titles, numbers, states and links** only, plus counts of recent commits and contributors. It never records issue bodies, comments, or the names or emails of authors. Everything it reads from GitHub is treated as untrusted data: it is summarised, and instructions inside it are not followed. The result is saved as `_evidence.yaml` beside the tutorial, with the date it was gathered.
+
+If something isn't working, the final report says why GitHub was skipped (for example "gh not installed", "gh not authenticated", "not a GitHub repo", "rate limited"). See also [Troubleshooting](#troubleshooting).
 
 ---
 
@@ -621,6 +668,8 @@ pip install "griffe<1.10"
 ```
 
 **My tutorial in an existing site has no code windows or line highlighting.** In an existing site the default extensions are only added if you agree (or they are already installed and enabled), and a run that can't ask counts as a "no". The final report lists what was skipped. See [In an existing Quarto / quartodoc site](#quarto-extensions).
+
+**The advanced pages say GitHub wasn't checked.** The evidence step needs `gh` installed and signed in, a `github.com` remote, and permission to run it. Run `gh auth status` in the same terminal, then see [GitHub access](#github-access). The final report names the reason.
 
 **An extension failed to install.** `quarto add` needs network access to GitHub. The run continues without that extension, and the final report lists it as skipped. Re-run once you're online, or install it yourself with `quarto add <source>` in the tutorial folder.
 
