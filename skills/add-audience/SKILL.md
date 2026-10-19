@@ -20,6 +20,7 @@ This skill reuses the `write` skill's agents, references and scripts, which live
 | `target` | `.` | The repository the tutorial describes (a local path; a cloned URL isn't supported) |
 | `tutorial` | auto | The tutorial folder containing `_generation.json` |
 | `layout` | `ask` | Only matters when the tutorial has a single audience: `convert` (to multi-audience), `replace` (swap the voice, stay flat), `separate` (a second, independent tutorial folder). `ask` asks you |
+| `advanced_structure` | `tailored` | Chapter structure for a new **advanced** audience (`tailored` or `shared`; see `style-presets.md`). Existing audiences keep theirs |
 | `theme` | the record's | A theme applies to every audience, so it is only accepted with `layout=replace` or `separate` |
 | `critique` | the record's | `on` or `off` |
 | `dry_run` | off | Report the layout choices, what would change and what it would cost, then stop |
@@ -69,7 +70,7 @@ If `dry_run`, report the chosen (or possible) layouts, the files that would move
 
 ## 5. Prepare the inputs
 
-1. **Style blocks.** For each new audience build the block as in write step 3, with the record's `theme` and `args.notes` (as "House notes"), into `<output>/_work/style-<slug>.md` (for `replace`, `<output>/_work/style.md`). Put **only new style blocks** in `_work/`: the record copies every `style*.md` it finds there into `_styles/`.
+1. **Style blocks.** For each new audience build the block as in write step 3, with the record's `theme` and `args.notes` (as "House notes"), into `<output>/_work/style-<slug>.md` (for `replace`, `<output>/_work/style.md`). For an advanced audience, set its `Structure:` field from `advanced_structure` as in write step 3. Put **only new style blocks** in `_work/`: the record copies every `style*.md` it finds there into `_styles/`.
 2. **Load the stored analysis** into `_work/`: copy `_outline.yaml` to `_work/outline.yaml`, and `_evidence.yaml`, `_plain-outline.yaml` and `_site-profile.yaml` if present. These are the shared facts; don't change them.
 3. **Outline readiness.**
    - If a new audience is advanced and any abstraction in the outline has no `tests` key (the outline predates 1.8), spawn `tutorial-analyst` once in **tests-only mode**: `previous_outline` = the stored outline, `tests_only: true`, the target, `outline-schema.md`, and the output `_work/outline.yaml`. It changes nothing else.
@@ -181,7 +182,7 @@ Write the JSON inputs to `_work/` and run:
 ```
 python <write>/scripts/write_record.py extend --repo <target> --tutorial <output> --audiences <_work/audiences.json> [--pages <_work/new-pages.json>] [--chapter-tests <_work/chapter-tests.json>] [--format website] [--source-base-url <value>] --outline <_work/outline.yaml> [--plain-outline ...] [--evidence ...] [--site-profile ...] --styles-dir <_work> [--rename-style style.md=style-<old>.md] --note "added <slugs> (<layout>)"
 ```
-- `audiences.json`: the **complete** new list, each `{slug, preset, folder, kind}`. For `convert`, the old audience's `folder` becomes `<old>`; for `replace`, the old audience is replaced by the new one, with `folder: "."`.
+- `audiences.json`: the **complete** new list, each `{slug, preset, folder, kind}` (plus `structure` for a new advanced audience, and keep the existing audiences' entries as they are). For `convert`, the old audience's `folder` becomes `<old>`; for `replace`, the old audience is replaced by the new one, with `folder: "."`.
 - `new-pages.json`: the new stakeholder audiences' pages (`audience`, `id`, `filename`, `evidence`) from `plain-outline.yaml`, as in write step 7.
 - `chapter-tests.json`: `{chapter id: [test paths]}` from the outline, only if step 5.3 filled them in.
 - `--rename-style`: for `convert`, move the old flat `style.md`; `--remove-style` anything for an audience that no longer exists.

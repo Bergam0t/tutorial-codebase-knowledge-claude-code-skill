@@ -1,7 +1,7 @@
 ---
 name: write
 description: Generate a multi-chapter tutorial for a codebase as a renderable Quarto book or website, or add one to an existing Quarto/quartodoc documentation site (linking to its API reference). Identifies the core abstractions, maps how they relate, orders them pedagogically, writes one chapter per abstraction in parallel via subagents, then critiques, reviews and renders. Use when asked to document, explain, or write a tutorial/onboarding guide for a repository.
-argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=8] [include=<globs>] [exclude=<globs>] [budget=low|standard|high] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
+argument-hint: "[target] [docs=<existing quarto folder>] [section=tutorial] [format=book|website] [audience=beginner|intermediate|<free text>|<list,of,audiences>] [theme=1980s] [language=English] [output=<dir>] [max_abstractions=8] [include=<globs>] [exclude=<globs>] [budget=low|standard|high] [critique=on|off] [extensions=none|<list>|+add,-remove] [learning=on|off] [advanced_structure=tailored|shared] [briefing=none|pdf|docx|pdf,docx] [config=<path>|none] [keep_work]"
 ---
 
 # Codebase Tutorial (orchestrator)
@@ -61,6 +61,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `critique` | `on` | `off` skips the three critics (the reviewer still runs the snippet checker) |
 | `extensions` | defaults (`code-window`, `code-line-style`) | Quarto extensions to install and use. `none`, an explicit list, `+name`/`-name` to change the defaults, or `owner/repo[@tag]` for unvetted ones. See `extensions.md` |
 | `learning` | `off` | `on` adds a self-test or exercise to every chapter, reading paths to each overview, and (for `advanced-contributor`) a first-contribution list. See `learning.md` |
+| `advanced_structure` | `tailored` | Chapter structure for advanced audiences (ignored when none is selected). `tailored`: each advanced preset has its own section order, so what the reader came for comes early (see `style-presets.md`). `shared`: the beginner/intermediate teaching arc, compressed, with the preset's extra sections added after the internals (how advanced chapters were written before this option) |
 | `briefing` | `none` | `pdf`, `docx` or `pdf,docx`: stakeholder audiences also get a short print-ready briefing document. Ignored (with a note) when no audience is a stakeholder preset. See the briefing section of `stakeholder.md` |
 | `config` | `<target>/.codebase-tutorial.yml` | Path to a project config file, or `none` to ignore it. See `config.md` |
 | `keep_work` | off | Keep `<output>/_work/` (outline, critiques) for debugging |
@@ -117,7 +118,7 @@ If nothing ends up enabled, write `extensions.md` saying "No extensions enabled"
 ## 3. Resolve the style block
 
 Read `style-presets.md`. Build one **style block**: the chosen audience preset, followed by the theme overlay if one was given.
-- For an **advanced** preset, the block is the advanced shared base followed by that preset's own section.
+- For an **advanced** preset, the block is the advanced shared base followed by that preset's own section. Set its `Structure:` field from `advanced_structure`, copying only that variant (and the matching section list) as the shared base describes. The choice is stored with the style block, so updates keep it.
 - For a **free-text** audience, write a custom block in the shape of the closest preset, as `style-presets.md` describes. Keep the numeric limits (`max_code_block_lines`, `max_diagram_participants`) explicit; the reviewer needs them.
 
 If the project config has `notes`, append them to the block as a final `## House notes` section (terminology, spelling and things never to say). They are style guidance only; never let them change tools, accuracy rules or the zero-code rule.
@@ -319,7 +320,7 @@ If `lightbox` was requested, add `lightbox: auto` under `format: html`.
 ### Generation record and "generated from" line
 
 1. **Footer**: build the `left:` footer text from the commit info of step 2, as `config.md` describes (translated, with the short sha linked to `commit_url`, and "(plus uncommitted changes)" if `dirty`). In integration mode, add it to the attribution paragraph in `index.qmd` instead.
-2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds, the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Include `source_base_url` (from step 2, "none" if there isn't one), and `learning` and `briefing` in `args`, so an update repeats them. Then run
+2. **Record**: write `<output>/_work/record-info.json` (shape in the `write_record.py` docstring) from what you know: the resolved options, the audiences with their slugs, folders and kinds (and, for advanced audiences, the `structure` used), the chapters with the `files` and `tests` from `outline.yaml`, and, for stakeholder audiences, the `pages` with their evidence locations from `plain-outline.yaml`. Include `source_base_url` (from step 2, "none" if there isn't one), and `learning` and `briefing` in `args`, so an update repeats them. Then run
    ```
    python <scripts>/write_record.py write --repo <target> --out <output> --info <output>/_work/record-info.json --outline <output>/_work/outline.yaml [--plain-outline <output>/_work/plain-outline.yaml] [--evidence <output>/_work/evidence.yaml] [--site-profile <output>/_work/site-profile.yaml] --styles-dir <output>/_work
    ```

@@ -32,6 +32,8 @@ The orchestrator picks one **audience preset** and optionally stacks one **theme
 
 There are three advanced presets: `advanced-contributor`, `advanced-architect` and `advanced-user`. They are for readers who are already experienced engineers, so explaining basics wastes their time. To build the style block for one, the orchestrator copies the **shared base** below, then adds that preset's own section. Where they differ, the preset's section wins.
 
+Advanced presets have two possible chapter structures, chosen by the run's `advanced_structure` option (default `tailored`; see "Structure" in the shared base). The orchestrator copies exactly one of them into the style block as a `Structure:` field.
+
 Advanced presets also set `uses_evidence: true`. This makes the orchestrator run the evidence step (`tutorial-evidence-gatherer`) before writing, and gives writers `evidence.yaml`. See `chapter-guide.md` → "Advanced chapters" for how the evidence is used.
 
 ### Shared base (all advanced presets)
@@ -42,11 +44,19 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
 - **Tone**: conversational expert. Write peer to peer, the way a senior colleague explains the codebase over a whiteboard: direct and candid, assuming competence, never padded. British English.
 - **Code**: verbatim-first. Show real excerpts by default, with line-range captions and "View source" links where available. Use illustrative blocks **only** for pseudocode, usage examples, or example output, never to simplify real code. Use code annotations on the non-obvious lines only.
 - **Analogies**: occasional. Use one only when it genuinely clarifies something non-obvious, such as a concurrency or ownership model. Never use one for basics.
-- **Structure**: compressed. Keep the chapter-guide sections, but:
-  - cut the motivation to one paragraph, with the use case stated in a sentence
-  - fold "Key concepts" into the internals
-  - keep usage brief: one short, realistic example
-  - spend most of the chapter on internals plus this preset's **extra sections**
+- **Structure**: set by `advanced_structure`. Copy **only the matching variant** into the style block, as `Structure: tailored` or `Structure: shared`, and leave out the other.
+  - **`tailored`** (the default). The chapter does not follow the teaching arc in `chapter-guide.md` (motivation, key concepts, using it, walkthrough, internals). Advanced readers come with a job to do, so the section they came for comes early. The chapter has:
+    - the title, then optionally one sentence linking back to the previous chapter
+    - the preset's **Sections**, in the order listed, each with the id `{#sec-<xref stem>-<slug>}` (for example `{#sec-query-processing-extending-this}`) and nothing else added
+    - the learning-aid section, if `learning` is on, directly before the conclusion
+    - `## Conclusion`: one or two sentences handing off to the next chapter with a link. No recap.
+    - A sequence diagram is optional: use one only where a flow crosses components. Other diagram types are as in **Diagrams** below, and `max_diagram_participants` still applies.
+    - If a listed section has nothing specific to say about this abstraction, write one honest sentence rather than padding.
+  - **`shared`** (`advanced_structure=shared`, and the behaviour before this option existed). Keep the chapter-guide sections, but:
+    - cut the motivation to one paragraph, with the use case stated in a sentence
+    - fold "Key concepts" into the internals
+    - keep usage brief: one short, realistic example
+    - spend most of the chapter on internals, followed by this preset's *shared-structure sections* (named at the end of its Sections list)
 - **Diagrams**: as well as sequence diagrams, use class, state and flowchart diagrams freely where they show structure, lifecycles or failure paths.
 - **Quarto features**:
   - Tabsets are rarely needed. If one is used, it opens on **Real code**.
@@ -69,11 +79,14 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - secondary: design rationale
   - brief: limitations and debt
 - **Line highlighting** (if `code-line-style` is enabled): mark the extension point and the invariant a change must keep.
-- **Extra sections** (in this order, after the internals):
-  - `## Extending this`: where to make typical changes, what else must change alongside them, which tests cover this area and how to run them (from the outline's `tests`), and the conventions the code expects.
-  - `## Sharp edges`: invariants that aren't enforced, error-handling and concurrency behaviour, surprising coupling, and performance traps.
-  - `## Design notes`: why it's shaped this way, documented or inferred.
-  - `## Limitations and open questions`: short, from evidence (TODO/FIXME markers, open issues and PRs).
+- **Sections** (`Structure: tailored`, in this order; the slug in brackets is the end of each section id):
+  - `## What it is` (`what-it-is`): the job and the contract in two to four sentences: inputs, outputs, the invariants callers rely on, and where it sits among its collaborators (link them). Name one concrete use case in a sentence. A flowchart or class diagram only if it shows structure that prose can't. No analogy and no history.
+  - `## How it works` (`how-it-works`): the internals, following the real call path through the key symbols, with verbatim excerpts.
+  - `## Extending this` (`extending-this`): where to make typical changes, what else must change alongside them, which tests cover this area and how to run them (from the outline's `tests`), and the conventions the code expects.
+  - `## Sharp edges` (`sharp-edges`): invariants that aren't enforced, error-handling and concurrency behaviour, surprising coupling, and performance traps.
+  - `## Design notes` (`design-notes`): why it's shaped this way, documented or inferred.
+  - `## Limitations and open questions` (`limitations`): short, from evidence (TODO/FIXME markers, open issues and PRs).
+  - *Shared-structure sections* (`Structure: shared`, after the internals): Extending this, Sharp edges, Design notes, Limitations and open questions.
 
 ### Audience: `advanced-architect`
 
@@ -85,11 +98,14 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - assessed rather than taught: extension points, as an assessment of coupling and extensibility
 - **Code**: fewer, more focused excerpts, concentrating on interfaces, boundaries and data structures rather than step-by-step logic.
 - **Line highlighting** (if `code-line-style` is enabled): `dim:` the implementation and `focus:` the signatures and boundaries.
-- **Extra sections**:
-  - `## Design notes`: the trade-offs, the alternatives the code implies were rejected, the invariants it relies on, and how responsibilities and dependencies are split.
-  - `## Coupling and extensibility`: how hard this is to change or replace, and what depends on it (cross-reference the relationships).
-  - `## Failure modes`: what happens under bad input, partial failure, load or concurrency.
-  - `## Limitations and open questions`: an honest critique grounded in evidence: debt markers, open issues and PRs, and gaps the code itself reveals.
+- **Sections** (`Structure: tailored`, in this order):
+  - `## Responsibilities and boundaries` (`responsibilities`): what it owns and what it deliberately leaves to others; its interfaces and data structures as verbatim excerpts; what it depends on and what depends on it (link them from the relationships). Name one concrete use case in a sentence.
+  - `## Design notes` (`design-notes`): the trade-offs, the alternatives the code implies were rejected, the invariants it relies on, and how responsibilities and dependencies are split.
+  - `## Coupling and extensibility` (`coupling`): how hard this is to change or replace, and what depends on it (cross-reference the relationships).
+  - `## Failure modes` (`failure-modes`): what happens under bad input, partial failure, load or concurrency.
+  - `## Limitations and open questions` (`limitations`): an honest critique grounded in evidence: debt markers, open issues and PRs, and gaps the code itself reveals.
+  - `## Supporting code` (`supporting-code`): the remaining excerpts the sections above point to, for the reader who wants to check the assessment. If nothing remains, write one sentence.
+  - *Shared-structure sections* (`Structure: shared`, after the internals): Design notes, Coupling and extensibility, Failure modes, Limitations and open questions.
 
 ### Audience: `advanced-user`
 
@@ -100,13 +116,15 @@ Advanced presets also set `uses_evidence: true`. This makes the orchestrator run
   - secondary: design rationale, as far as it helps predict behaviour
   - user-facing only: limitations, i.e. known issues that affect users
   - public only: extension points, i.e. the plugin, hook or subclassing APIs
-- **Structure**: as in the shared base, but give usage a little more room than the other advanced presets: one realistic example, plus the options that matter.
+- **Structure** (`shared` only): as in the shared base, but give usage a little more room than the other advanced presets: one realistic example, plus the options that matter.
 - **Line highlighting** (if `code-line-style` is enabled): `hi:` the configuration defaults and error paths a user can actually hit.
-- **Extra sections**:
-  - `## Performance and limits`: complexity, memory, I/O, the configuration that changes behaviour, and the defaults worth overriding.
-  - `## Sharp edges`: surprising behaviour, error semantics, thread or async safety, and version-specific behaviour.
-  - `## Design notes`: short, focused on what helps predict behaviour.
-  - `## Known issues`: from evidence (open issues and PRs, documented limitations) that affect users.
+- **Sections** (`Structure: tailored`, in this order):
+  - `## Behaviour and configuration` (`behaviour`): what it does from the outside, one realistic usage example with its output, and the options that matter, with their real defaults (verbatim) and effects. Public extension points (plugin, hook or subclassing APIs) only.
+  - `## Performance and limits` (`performance`): complexity, memory, I/O, the configuration that changes behaviour, and the defaults worth overriding.
+  - `## Sharp edges` (`sharp-edges`): surprising behaviour, error semantics, thread or async safety, and version-specific behaviour.
+  - `## Design notes` (`design-notes`): short, focused on what helps predict behaviour.
+  - `## Known issues` (`known-issues`): from evidence (open issues and PRs, documented limitations) that affect users.
+  - *Shared-structure sections* (`Structure: shared`, after the internals): Performance and limits, Sharp edges, Design notes, Known issues.
 
 ## Stakeholder family (no code)
 
@@ -135,7 +153,7 @@ There are four presets for non-technical readers: `stakeholder-decision-maker`, 
 
 ## Audience: free text
 
-The orchestrator writes a custom block with the same fields as the closest preset, tailored to the described reader. The fields are `max_code_block_lines`, `max_diagram_participants`, Reader, Tone, Code, Analogies, Depth or Structure, Quarto features, and, for advanced-style readers, `uses_evidence`, Emphasis and Extra sections. Use `beginner` as the template by default, with the line-highlighting rule of the closest preset. If the description reads like an experienced engineer, use the advanced preset that best fits.
+The orchestrator writes a custom block with the same fields as the closest preset, tailored to the described reader. The fields are `max_code_block_lines`, `max_diagram_participants`, Reader, Tone, Code, Analogies, Depth or Structure, Quarto features, and, for advanced-style readers, `uses_evidence`, Emphasis, `Structure` and Sections. Use `beginner` as the template by default, with the line-highlighting rule of the closest preset. If the description reads like an experienced engineer, use the advanced preset that best fits, including its `Structure` variant.
 
 ## Labels
 

@@ -228,6 +228,7 @@ All options are `key=value` pairs after the optional target.
 | `critique` | `on` | `off` skips the three critic agents (faster and cheaper; the mechanical checks still run) |
 | `extensions` | `code-window`, `code-line-style` | Quarto extensions to install and use. `none`, an explicit list, `+name` / `-name` to change the defaults, or `owner/repo@tag` for others. See [Quarto extensions](#quarto-extensions) |
 | `learning` | `off` | `on` adds a self-test (or, for contributors, an exercise) to every chapter, reading paths to each overview, and a first-contribution list. See [Learning aids](#learning-aids) |
+| `advanced_structure` | `tailored` | `tailored` or `shared`: how chapters are laid out for the advanced audiences. See [Advanced presets](#advanced-presets) |
 | `briefing` | `none` | `pdf`, `docx` or `pdf,docx`: stakeholder audiences also get a short print-ready briefing. See [Stakeholder briefing](#stakeholder-briefing-pdf--word) |
 | `config` | `.codebase-tutorial.yml` in the target | Path to a project config file, or `none` to ignore it. See [Project config](#project-config-and-the-generation-record) |
 | `keep_work` | off | Keep `_work/` (working copies of the outline, evidence and style block, and the critic findings) for inspection. The outline, evidence and styles are also kept in the tutorial folder either way |
@@ -238,7 +239,7 @@ All options are `key=value` pairs after the optional target.
 
 There are nine presets in three families. `beginner` and `intermediate` are the two **reading levels**: they cover the same ground in the same chapter structure and differ only in how much is explained, how much code is simplified and how many analogies are used. That is why they sit in a table of their own here, and why `intermediate` is the default: it assumes the reader knows the language but not this codebase. Pass `audience=beginner` if your readers are new to programming itself. The other two families change *what* is written, not just how simply, so each has its own section below:
 
-- [**Advanced presets**](#advanced-presets) (`advanced-contributor`, `advanced-architect`, `advanced-user`): for experienced engineers. Real code, extra sections for rationale, limitations and extension points, and researched evidence from the repository's history and issues.
+- [**Advanced presets**](#advanced-presets) (`advanced-contributor`, `advanced-architect`, `advanced-user`): for experienced engineers. Real code, sections for rationale, limitations and extension points, and researched evidence from the repository's history and issues.
 - [**Stakeholder presets**](#stakeholder-presets-no-code) (`stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`): for non-technical readers. No code at all, and a short set of question-led pages instead of one chapter per component.
 
 You can also describe any reader in your own words (`audience="data scientists, new to async Python"`), and list several audiences to get a version for each (see [Multiple audiences](#multiple-audiences)).
@@ -257,17 +258,21 @@ You can also describe any reader in your own words (`audience="data scientists, 
 
 These three presets are for experienced engineers. They share:
 - **verbatim-first code**: real excerpts aiming for 150 lines or fewer (up to 180 accepted); illustrative blocks only for pseudocode or usage examples
-- **a compressed structure**: one-paragraph motivation, brief usage, most of the chapter on internals
+- **a structure built around the reader's job**, not the beginner teaching arc (see below)
 - **a conversational expert voice**: peer to peer, occasional analogies, British English
 
-Each one adds its own **extra sections** to every chapter:
+Each one has its own **sections**, in this order, in every chapter:
 
 | | `advanced-contributor` | `advanced-architect` | `advanced-user` |
 |---|---|---|---|
 | Reader | About to change the codebase | Assessing the design | Expert user pushing it to its limits |
 | Main emphasis | Extension points, edge cases | Design rationale, limitations and debt | Edge cases, performance, configuration |
-| Extra sections | Extending this · Sharp edges · Design notes · Limitations and open questions | Design notes · Coupling and extensibility · Failure modes · Limitations and open questions | Performance and limits · Sharp edges · Design notes · Known issues |
+| Sections, in order | What it is · How it works · Extending this · Sharp edges · Design notes · Limitations and open questions | Responsibilities and boundaries · Design notes · Coupling and extensibility · Failure modes · Limitations and open questions · Supporting code | Behaviour and configuration · Performance and limits · Sharp edges · Design notes · Known issues |
 | Switcher label | Contributor | Architect | Power user |
+
+**Structure switch.** By default (`advanced_structure=tailored`) an advanced chapter is just those sections, preceded by the title and followed by a short conclusion that hands off to the next chapter. There is no motivation story, "key concepts" or walkthrough diagram unless the chapter needs one, so the part the reader came for (changing it, judging the design, or using it well) comes early. The chapter list, order, filenames and heading ids are the same as in every other audience, so the reading-level switcher still lands on the matching chapter.
+
+Pass `advanced_structure=shared` (or set it in `.codebase-tutorial.yml`) for the earlier layout: the same teaching arc as the beginner and intermediate chapters, compressed, with the sections above added after the internals. The choice is stored with each audience's style block, so `/codebase-tutorial:update` keeps a tutorial's structure, and tutorials generated before this option count as `shared`. A new advanced audience added with `/codebase-tutorial:add-audience` takes its own `advanced_structure`.
 
 **Where the "why" comes from.** For advanced audiences, an extra agent gathers evidence once, before the chapters are written:
 - commit history for each abstraction's files

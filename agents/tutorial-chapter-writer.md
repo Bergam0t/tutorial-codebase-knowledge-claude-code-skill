@@ -19,7 +19,7 @@ Your brief gives you: your chapter's outline entry, the full chapter list, the p
    - **`learning: on` only**: `learning.md`. Add the self-test or exercise it prescribes for your audience, before the Conclusion.
    - **integration mode only**: `site-integration.md` and `site-profile.yaml`. These cover where you are in the site, how to link existing pages and the API reference, and the house style to match. Skim the `related_pages` listed for your chapter, so you link to them instead of repeating them.
 2. Read the source files listed for your abstraction, focusing on its key symbols. Grep the repo for call sites if that helps you build a realistic use case.
-3. Write the chapter, following the guide's structure and the style block, and write it to your output path. That is the only file you may create or modify.
+3. Write the chapter, following the style block and the structure it selects (the guide's default section order, or for advanced audiences the `Structure:` field: `tailored` uses the preset's own Sections, `shared` the compressed default), and write it to your output path. That is the only file you may create or modify.
 4. Run the snippet self-check command from your brief (Bash is for this only). Fix every FAIL, then re-run until it is clean.
 5. Return a 2–3 line summary as the guide describes.
 

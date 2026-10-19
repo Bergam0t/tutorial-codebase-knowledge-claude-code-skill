@@ -26,6 +26,7 @@ include: ["src/**"]
 exclude: ["src/legacy/**", "**/_vendor/**"]
 critique: on                  # on | off
 learning: on                  # self-tests, exercises, reading paths (see learning.md)
+advanced_structure: tailored  # tailored | shared: chapter structure for advanced audiences
 briefing: pdf,docx            # print-ready briefing for stakeholder audiences
 extensions: [code-window, code-line-style, include-code-files]
 
@@ -78,7 +79,7 @@ Contents:
 | `source` | `repo_url`, `commit`, `branch`, `commit_date`, `dirty` (uncommitted changes when generated), `dirty_files`, `commit_url` |
 | `project_name`, `mode`, `docs`, `section`, `format`, `language`, `theme`, `extensions` | The resolved options |
 | `source_base_url` | The permalink prefix used for "View source" links, or `"none"` (schema 2) |
-| `audiences` | Each audience's `slug`, `preset`, `folder` and `kind` (`chapters` or `stakeholder`) |
+| `audiences` | Each audience's `slug`, `preset`, `folder` and `kind` (`chapters` or `stakeholder`), and for advanced presets its `structure` (`tailored` or `shared`; absent in records from before the option, which means `shared`) |
 | `args` | Other resolved options (`max_abstractions`, `include`, `exclude`, `critique`, `focus`, `notes`) |
 | `chapters` | For each chapter: `id`, `name`, `filename`, and the source `files` and `tests` it depends on, each with the git blob hash of its content when the chapter was written |
 | `history` | Added by `/codebase-tutorial:add-audience`: a log of audience changes (`at`, `plugin`, `action`, `audiences`, `note`). Absent until the first one |

@@ -29,7 +29,7 @@ Preflight, in one Bash call: `python --version` (or `python3`), `git --version`,
 
 If `tutorial` wasn't given, search the target (depth ≤ 4, skipping `.git`, `node_modules`, `.venv`) for `_generation.json`. If there are several, ask which. If there is none, tell the user the tutorial was made before the record existed (plugin < 1.5.0) or isn't a generated one, and suggest `/codebase-tutorial:write` to create it (it will also write the record). Stop.
 
-Read the record. It is `schema` 1 or 2; schema 1 lacks `source_base_url` and the stored `_evidence.yaml` and `_site-profile.yaml`, so fall back as the steps below say. From it, take the resolved options (`format`, `language`, `theme`, `extensions`, `audiences`, `mode`, `docs`, `section`, `args`) and **use those, not today's defaults**. Take the style blocks from `<tutorial>/_styles/`. If the record's plugin version is older than this plugin's, mention it (new features may not apply to the old pages).
+Read the record. It is `schema` 1 or 2; schema 1 lacks `source_base_url` and the stored `_evidence.yaml` and `_site-profile.yaml`, so fall back as the steps below say. From it, take the resolved options (`format`, `language`, `theme`, `extensions`, `audiences`, `mode`, `docs`, `section`, `args`) and **use those, not today's defaults**. Take the style blocks from `<tutorial>/_styles/`. They also fix each advanced audience's chapter structure (`Structure: tailored` or `shared`; blocks stored before the option existed say `compressed`, which means `shared`), and an update never changes it. If the record's plugin version is older than this plugin's, mention it (new features may not apply to the old pages).
 
 ## 3. Drift check
 

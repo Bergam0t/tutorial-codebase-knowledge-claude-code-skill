@@ -42,8 +42,9 @@ Read `index.qmd` first, then every chapter in order, exactly as a newcomer would
 - **Advanced readers** (advanced presets): here the failure modes run the other way. Flag:
   - basics over-explained, and padding
   - analogies used where the reader needs none
-  - motivation or usage that runs long, when the structure should be compressed
-  - extra sections ("Sharp edges", "Extending this", "Design notes", etc.) that are generic boilerplate rather than specific to the code
+  - an opening that runs long before the reader reaches what they came for: under `Structure: tailored`, anything before the first listed section beyond a one-line transition; under `shared`, motivation or usage that should be compressed
+  - under `Structure: tailored`, sections out of the style block's order, missing, or added, and the section this reader most needs (see the preset's Emphasis) buried late
+  - sections ("Sharp edges", "Extending this", "Design notes", etc.) that are generic boilerplate rather than specific to the code
   - rationale that reads as speculation dressed up as fact
 
   Would an experienced engineer in the reader's role find each section worth their time?

@@ -13,7 +13,7 @@ Also follow `quarto-conventions.md`: it covers front matter, code fences, mermai
 
 ## Structure
 
-The structure below is the default. If your style block has a **Structure** field, or **Extra sections** (the advanced presets do), apply those on top of it, as described under "Advanced chapters" at the end of this guide.
+The structure below is the default, for `beginner`, `intermediate` and free-text audiences. Advanced audiences have a `Structure:` field in their style block. If it says `tailored`, the section order comes from the style block's **Sections** list instead of steps 2–5, 7, 8 and 12 below, while the rules in steps 1, 6, 9, 10 and 11 still apply. If it says `shared`, follow the steps below, compressed. See "Advanced chapters" at the end of this guide.
 
 1. **Title**: use the abstraction name, formatted per `quarto-conventions.md` for the `format` you were given. In a book that is an H1 with your `xref` id; in a website it goes in front matter. Give every `##` section an id derived from your xref.
 
@@ -57,13 +57,15 @@ Use them where they help the reader. Don't use every feature in every chapter.
 
 These rules apply when your style block sets `uses_evidence: true`. Your brief then also includes `evidence.yaml` and `evidence.md`. Read both, and use the entry under your abstraction's id.
 
-- **Compressed structure.** Keep the section order above, but:
-  - make the motivation one paragraph, with the use case in a sentence
-  - fold the key concepts into the internals
-  - keep usage to one short, realistic example (a little more for `advanced-user`)
-  - spend most of the chapter on internals and the **extra sections**
-- **Extra sections.** Add the `##` sections your style block lists, in its order, after the code-level internals and before the conclusion. Give each an id derived from your xref, e.g. `{#sec-query-processing-sharp-edges}`.
-  - Every extra section must be specific to this abstraction and grounded in its code or evidence. If there is genuinely nothing to say, write one honest sentence, e.g. "No known sharp edges beyond the error handling above." Don't pad.
+- **Structure.** Read the `Structure:` field of your style block.
+  - **`tailored`**: write the preset's **Sections** exactly, in its order, each as a `##` heading with the id `{#sec-<xref stem>-<slug>}` (the slug is given in brackets in the style block, e.g. `{#sec-query-processing-extending-this}`), and add nothing that isn't listed. Before them goes the title and, optionally, one sentence linking back to the previous chapter. After them go the learning-aid section (if `learning` is on) and a short `## Conclusion` that hands off to the next chapter (no recap). The default steps 3–5, 7 and 8 don't exist as sections here, but the material still belongs where the Sections say: the internals go in the section that covers them, and so on. A sequence diagram is optional. Don't re-explain what another chapter `introduces`; link to it.
+  - **`shared`**, or no `Structure:` field (a style block stored by an older version; treat it as `shared`): keep the section order above, but compress it:
+    - make the motivation one paragraph, with the use case in a sentence
+    - fold the key concepts into the internals
+    - keep usage to one short, realistic example (a little more for `advanced-user`)
+    - spend most of the chapter on internals and the **shared-structure sections**
+- **Shared-structure sections** (`Structure: shared` only). Add the `##` sections your style block lists, in its order, after the code-level internals and before the conclusion. Give each an id derived from your xref, e.g. `{#sec-query-processing-sharp-edges}`.
+- **Every section must be specific to this abstraction** and grounded in its code or evidence, in either structure. If there is genuinely nothing to say, write one honest sentence, e.g. "No known sharp edges beyond the error handling above." Don't pad.
 - **Rationale.** For every claim about *why*, cite an evidence item when one exists (commit, doc, issue/PR, or a comment `path:line`). Otherwise phrase it as an inference ("the code suggests…"). Follow the citing rules in `evidence.md`.
 - **Limitations and known issues.** Draw on `markers` (TODO/FIXME with `path:line`) and `issues` (linked, "open as of <gathered_on>"). End the section with the single issue-tracker line described in `evidence.md`.
 - **Extending this** (`advanced-contributor`): name the concrete files and functions to change, what else must change with them, and the tests that cover the area. Take tests from the evidence `tests` and the outline's `tests`, and give the command to run them if the repo documents one.
