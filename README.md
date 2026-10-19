@@ -189,6 +189,13 @@ All options are `key=value` pairs after the optional target.
 
 ### Audience presets
 
+There are nine presets in three families. `beginner` and `intermediate` are the two **reading levels**: they cover the same ground in the same chapter structure and differ only in how much is explained, how much code is simplified and how many analogies are used. That is why they sit in a table of their own here, and why `beginner` is the default. The other two families change *what* is written, not just how simply, so each has its own section below:
+
+- [**Advanced presets**](#advanced-presets) (`advanced-contributor`, `advanced-architect`, `advanced-user`): for experienced engineers. Real code, extra sections for rationale, limitations and extension points, and researched evidence from the repository's history and issues.
+- [**Stakeholder presets**](#stakeholder-presets-no-code) (`stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`): for non-technical readers. No code at all, and a short set of question-led pages instead of one chapter per component.
+
+You can also describe any reader in your own words (`audience="data scientists, new to async Python"`), and list several audiences to get a version for each (see [Multiple audiences](#multiple-audiences)).
+
 | | `beginner` | `intermediate` |
 |---|---|---|
 | Reader | New to programming concepts as well as to this codebase | Knows the language, new to this codebase |
