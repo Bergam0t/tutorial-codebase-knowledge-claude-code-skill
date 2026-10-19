@@ -4,7 +4,7 @@ The orchestrator picks one **audience preset** and optionally stacks one **theme
 
 ---
 
-## Audience: `beginner` (default)
+## Audience: `beginner`
 
 - **max_code_block_lines**: 20
 - **max_diagram_participants**: 5
@@ -16,7 +16,7 @@ The orchestrator picks one **audience preset** and optionally stacks one **theme
 - **Quarto features**: tabsets open on **Simplified** first. Put advanced internals in collapsed "Deep dive" callouts. Use code annotations generously. Give margin definitions for any term a newcomer might not know (including general programming terms).
 - **Line highlighting** (if `code-line-style` is enabled in `extensions.md`): use `hi:` only, on one to three lines, the ones the explanation right after the block is about. At most one highlighted block per section. No `focus`, `dim` or diff styles: they hide code a newcomer may want to read.
 
-## Audience: `intermediate`
+## Audience: `intermediate` (default)
 
 - **max_code_block_lines**: 100
 - **max_diagram_participants**: 10

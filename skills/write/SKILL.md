@@ -51,7 +51,7 @@ Parse `$ARGUMENTS` as an optional positional `target` followed by `key=value` pa
 | `docs` | none | Existing Quarto project folder (containing `_quarto.yml`), relative to the target. Switches on integration mode |
 | `section` | `tutorial` | Integration mode only: subfolder of `docs` to create the tutorial in |
 | `format` | `book` | `book` or `website`. In integration mode it is forced to the site's project type |
-| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
+| `audience` | `intermediate` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader. A comma-separated list (free-text entries in quotes) means multi-audience; see `multi-audience.md` |
 | `theme` | none | Optional overlay, e.g. `1980s` |
 | `language` | `English` | Language of all generated prose |
 | `output` | `output/<project_name>` | Relative to the current working directory |

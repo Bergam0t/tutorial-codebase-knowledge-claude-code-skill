@@ -7,7 +7,7 @@ This is an agentic rework of [AI Codebase Knowledge Builder](https://github.com/
 - find the 5–10 core abstractions
 - map how they relate
 - order them for teaching
-- write one beginner-friendly chapter per abstraction
+- write one chapter per abstraction, pitched at the reader you choose (intermediate by default)
 
 The work is delegated to Claude Code subagents that explore the code themselves, write chapters in parallel, and check each other's work.
 
@@ -218,7 +218,7 @@ All options are `key=value` pairs after the optional target.
 |---|---|---|
 | *target* | `.` | Local path or Git URL of the repository to document |
 | `format` | `book` | `book` (numbered chapters and appendix) or `website` (sidebar navigation) |
-| `audience` | `beginner` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
+| `audience` | `intermediate` | `beginner`, `intermediate`, `advanced-contributor`, `advanced-architect`, `advanced-user`, `stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`, or free text describing the reader, e.g. `audience="data scientists new to async Python"`. **List several** (comma-separated) to get switchable versions: see [Multiple audiences](#multiple-audiences) |
 | `theme` | none | Optional flavour overlay. Ships with `1980s` |
 | `language` | `English` | Language of all generated prose. Code and identifiers stay as-is |
 | `output` | `output/<project>` | Where to write the standalone project |
@@ -236,7 +236,7 @@ All options are `key=value` pairs after the optional target.
 
 ### Audience presets
 
-There are nine presets in three families. `beginner` and `intermediate` are the two **reading levels**: they cover the same ground in the same chapter structure and differ only in how much is explained, how much code is simplified and how many analogies are used. That is why they sit in a table of their own here, and why `beginner` is the default. The other two families change *what* is written, not just how simply, so each has its own section below:
+There are nine presets in three families. `beginner` and `intermediate` are the two **reading levels**: they cover the same ground in the same chapter structure and differ only in how much is explained, how much code is simplified and how many analogies are used. That is why they sit in a table of their own here, and why `intermediate` is the default: it assumes the reader knows the language but not this codebase. Pass `audience=beginner` if your readers are new to programming itself. The other two families change *what* is written, not just how simply, so each has its own section below:
 
 - [**Advanced presets**](#advanced-presets) (`advanced-contributor`, `advanced-architect`, `advanced-user`): for experienced engineers. Real code, extra sections for rationale, limitations and extension points, and researched evidence from the repository's history and issues.
 - [**Stakeholder presets**](#stakeholder-presets-no-code) (`stakeholder-decision-maker`, `stakeholder-domain-expert`, `stakeholder-product-owner`, `stakeholder-public`): for non-technical readers. No code at all, and a short set of question-led pages instead of one chapter per component.
