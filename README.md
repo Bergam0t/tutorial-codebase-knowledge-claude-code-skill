@@ -302,7 +302,24 @@ The skill installs Quarto extensions into the tutorial project with `quarto add`
 - **Other extensions:** pass `owner/repo@tag`. The skill asks before installing anything outside the vetted list, because extension filters run code on every render. It then works out the usage notes from the extension's own files.
 - **Filter order:** the skill orders filters correctly. For example, `value-box` must run before `highlight-text`, or the value boxes silently lose their colours.
 - **If an install fails:** the skill skips that extension, so writers never use syntax for something that isn't installed.
-- **Integration mode:** extensions the docs site already has are used as they are. The skill asks before adding a new one to your site.
+- **Integration mode:** the defaults are *not* installed automatically. See the next section.
+
+**In an existing Quarto / quartodoc site.** The site's `_extensions/` folder and `filters:` list are yours, so the skill treats the defaults differently there. It surveys what the site already has, then sorts each requested extension (the defaults included) into one of three cases:
+
+| Situation | What happens |
+|---|---|
+| Installed in `_extensions/` **and** listed under `filters:` | Used straight away. Writers get its usage notes. |
+| Installed but **not** under `filters:` | Needs one added line in `_quarto.yml`, so the skill **asks first**. |
+| **Not installed** | Needs a new `_extensions/<name>/` folder and a `filters:` line, so the skill **asks first**. |
+
+Anything you decline is skipped, and the writers are told not to use its syntax. **If the skill can't ask** (a headless run, for example), it counts as declined. That is the usual reason a tutorial in an existing site comes out without framed code windows or line highlighting: a plain site has neither extension, so nothing was added. Also, extension *options* (such as the `code-window` style) are never added to an existing site without asking.
+
+To get the extensions you want in an existing site:
+- **Say yes when asked.** The question lists each extension and exactly what it would change in your site.
+- **Or install them yourself first.** Run `quarto add mcanouil/quarto-code-window@1.6.0` (and so on, using the sources pinned in [`extensions.md`](skills/write/references/extensions.md)) in the docs folder and list the filter under `filters:`. The skill then finds them in the first row of the table and uses them without asking.
+- **Check the final report.** It lists the extensions installed or used, and those skipped with the reason.
+
+Extension filters run code at every render, which is why a pinned release is used and your site is never changed without a question. `/codebase-tutorial:add-audience` reuses the extension list recorded in `_generation.json` and doesn't install anything again.
 
 **About `include-code-files`.** Included excerpts can't contain copying mistakes, but they need care:
 - **Location:** it's only enabled when the tutorial lives inside the repository it documents, because includes are relative paths.
@@ -436,7 +453,7 @@ Copy [`skills/update/templates/tutorial-freshness.yml`](skills/update/templates/
 - **Snippets**: verbatim code still matches the repository (fails the job)
 - **Links**: relative links, anchors and quartodoc interlinks still resolve (fails the job)
 
-The workflow pins `PLUGIN_REF` to a release tag of this plugin (currently `v1.7.0`) so checks are reproducible. Update it when you upgrade the plugin.
+The workflow pins `PLUGIN_REF` to a release tag of this plugin so checks are reproducible. Update it when you upgrade the plugin.
 
 ---
 
@@ -594,6 +611,8 @@ Everything is plain Markdown. Edit a clone and load it with `claude --plugin-dir
 ```bash
 pip install "griffe<1.10"
 ```
+
+**My tutorial in an existing site has no code windows or line highlighting.** In an existing site the default extensions are only added if you agree (or they are already installed and enabled), and a run that can't ask counts as a "no". The final report lists what was skipped. See [In an existing Quarto / quartodoc site](#quarto-extensions).
 
 **An extension failed to install.** `quarto add` needs network access to GitHub. The run continues without that extension, and the final report lists it as skipped. Re-run once you're online, or install it yourself with `quarto add <source>` in the tutorial folder.
 

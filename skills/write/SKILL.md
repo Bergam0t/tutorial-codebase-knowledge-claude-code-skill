@@ -107,7 +107,7 @@ Then read the profile:
 Unless `extensions=none`, read `references/extensions.md` and follow its "Installing" section:
 1. Resolve the list, and drop anything ineligible. The Quarto version comes from the preflight.
 2. **Unvetted** extensions: ask the user before installing any.
-3. **Integration mode**: use the site's existing extensions (from `site-profile.yaml`), and ask before installing or enabling anything new in the site.
+3. **Integration mode**: use the site's existing extensions (from `site-profile.yaml`), and ask before installing or enabling anything new in the site. If you can't ask (a headless run), treat it as declined and say so in the final report.
 4. Install with `quarto add … --no-prompt` into the Quarto project root.
 5. Write `<output>/_work/extensions.md`, with the usage notes for exactly what is enabled.
 6. Keep the list of filters, in order, plus any `extensions:` options, for the `_quarto.yml` in step 7.
